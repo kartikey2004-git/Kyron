@@ -134,7 +134,7 @@ export default function UserButton({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-68" align="end" forceMount>
+      <DropdownMenuContent className="w-68" align="end" side="right" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-3">
