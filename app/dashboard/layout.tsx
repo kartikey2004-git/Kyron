@@ -9,8 +9,11 @@ import React from "react";
 import { Separator } from "@/components/ui/separator";
 import AppSideBar from "@/components/ui/app-sidebar";
 import { cn } from "@/lib/utils";
+import { requireAuthenticated } from "@/modules/auth/utils/auth-utils";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+  await requireAuthenticated();
+
   return (
     <TooltipProvider>
       <SidebarProvider>
@@ -24,7 +27,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             )}
           >
             <SidebarTrigger className="-ml-1" />
-            
+
             <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
           </header>
           <main className="flex-1 overflow-auto p-6">{children}</main>
@@ -35,5 +38,3 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default DashboardLayout;
-
-

@@ -111,21 +111,6 @@ export const plans = [
     ],
     highlighted: true,
   },
-  {
-    name: "Team",
-    description: "For growing teams",
-    price: "$99",
-    period: "/month",
-    features: [
-      "Everything in Pro",
-      "Unlimited team members",
-      "Advanced analytics",
-      "SSO authentication",
-      "Dedicated support",
-      "Custom integrations",
-    ],
-    highlighted: false,
-  },
 ];
 
 export const footerLinks = {
@@ -147,9 +132,17 @@ export const footerLinks = {
 };
 
 export const socialLinks = [
-  { name: "GitHub", href: "https://github.com", icon: Github },
-  { name: "Twitter", href: "https://twitter.com", icon: Twitter },
-  { name: "LinkedIn", href: "https://linkedin.com", icon: Linkedin },
+  {
+    name: "GitHub",
+    href: "https://github.com/kartikey2004-git/AI-Code-Review",
+    icon: Github,
+  },
+  { name: "Twitter", href: "https://x.com/kartikeybuilds", icon: Twitter },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/kartikey-bhatnagar-2702a4337",
+    icon: Linkedin,
+  },
 ];
 
 export const navigationConfig: NavigationSection[] = [

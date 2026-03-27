@@ -2,6 +2,8 @@
 
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +14,9 @@ import {
   CheckCircle,
   Github,
   GitPullRequest,
+  Moon,
   Star,
+  Sun,
   Zap,
 } from "lucide-react";
 import {
@@ -28,6 +32,12 @@ import { features, footerLinks, plans, socialLinks, steps } from "./data";
 export function MainPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleStartReviewing = () => {
     if (session) {
@@ -37,197 +47,215 @@ export function MainPage() {
     }
   };
 
+  const handleThemeToggle = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
     <div>
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <Badge className="mx-auto bg-white/10 text-white border-white/20 hover:bg-white/20">
-                AI-Powered Code Review
-              </Badge>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-foreground">
+      <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b border-border bg-background">
+        <div className="flex h-full items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-6 w-6 items-center justify-center border border-border bg-background">
+              <span className="text-[10px] font-medium leading-none">AI</span>
+            </div>
+            <span className="text-sm font-medium">AI Code Review</span>
+          </div>
+
+          {mounted && (
+            <button
+              onClick={handleThemeToggle}
+              className="flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-background hover:bg-muted transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-3 w-3" />
+              ) : (
+                <Moon className="h-3 w-3" />
+              )}
+            </button>
+          )}
+        </div>
+      </header>
+
+      <section className="flex min-h-screen items-center justify-center bg-background pt-14">
+        <div className="w-full max-w-4xl px-8 text-center">
+          <div className="space-y-12">
+            <div className="space-y-8">
+              <div className="inline-flex items-center rounded-full border border-border bg-muted/50 px-4 py-2">
+                <span className="text-sm font-medium tracking-wide">
+                  AI-Powered Code Review
+                </span>
+              </div>
+
+              <h1 className="text-4xl leading-tighter tracking-tight sm:text-5xl lg:text-6xl">
                 Review pull requests
-                <br />
-                <span className="text-primary">in seconds</span> with AI
+                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  {" "}
+                  in seconds
+                </span>
+                <span className="text-muted-foreground"> with AI</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+
+              <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-tight sm:text-xl">
                 Catch bugs, get intelligent suggestions, and ship better code
                 faster. Our AI reviews every line of code so your team can focus
                 on building.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col gap-4 justify-center items-center sm:flex-row sm:gap-6">
               <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[200px]"
                 onClick={handleStartReviewing}
+                size="lg"
+                className="h-14 px-8 text-base font-medium transition-all hover:scale-105"
               >
                 Start reviewing
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg" className="min-w-[200px]">
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-14 px-8 text-base font-medium"
+              >
                 Built by Kartikey
               </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Github className="h-4 w-4" />
-                <span>GitHub integration</span>
-              </div>
-              <span>•</span>
-              <span>Setup in 2 minutes</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-4">
+      <section className="py-24 bg-background">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl leading-tighter tracking-tighter mb-8 sm:text-4xl lg:text-5xl">
               Everything you need for
               <br />
-              <span className="text-primary">smarter code reviews</span>
+              <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                smarter code reviews
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto sm:text-xl leading-relaxed">
               Powerful AI features that help your team ship better code, faster.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card
+                <div
                   key={index}
-                  className="group bg-card border border-border hover:border-primary/20 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg"
+                  className="group border border-border bg-card p-8 transition-all duration-300 hover:border-foreground/20 hover:shadow-lg hover:shadow-foreground/5"
                 >
-                  <CardHeader className="pb-3">
+                  <div className="space-y-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Icon className="h-5 w-5 text-primary" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted/50">
+                        <Icon className="h-6 w-6 text-foreground" />
                       </div>
                       {feature.badge && (
-                        <Badge variant="secondary" className="text-xs">
-                          {feature.badge}
-                        </Badge>
+                        <div className="rounded-full border border-border bg-muted/50 px-3 py-1">
+                          <span className="text-xs font-medium">
+                            {feature.badge}
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <CardTitle className="text-lg leading-tight">
+
+                    <h3 className="text-xl font-semibold leading-tight">
                       {feature.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm leading-relaxed">
+                    </h3>
+
+                    <p className="text-base text-muted-foreground leading-relaxed">
                       {feature.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                    </p>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-4">
+      <section className="py-24 bg-muted/30">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl leading-tighter tracking-tighter mb-4 sm:text-4xl lg:text-5xl">
               How it works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto sm:text-xl leading-relaxed">
               Get started in minutes. No complex configuration required.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={index} className="relative">
-                  <Card className="h-full bg-card border border-border hover:border-primary/20 transition-all duration-200">
-                    <CardContent className="p-8 text-center">
-                      <div className="flex flex-col items-center space-y-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                          <Icon className="h-8 w-8 text-primary" />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="text-xl font-semibold">
-                            {step.title}
-                          </h3>
-                          <p className="text-muted-foreground leading-relaxed">
-                            {step.description}
-                          </p>
-                        </div>
+                <div key={index} className="text-center relative">
+                  <div className="space-y-8">
+                    <div className="flex justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center border border-border bg-background shadow-sm">
+                        <Icon className="h-8 w-8 text-foreground" />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
 
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold leading-tight">
+                        {step.title}
+                      </h3>
+                      <p className="text-base text-muted-foreground leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-1/2 -translate-y-1/2 left-full w-8">
-                      <div className="flex items-center justify-center">
-                        <div className="h-0.5 w-full bg-border"></div>
-                      </div>
+                    <div className="hidden sm:block absolute top-8 left-full w-12 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent">
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-border"></div>
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-border"></div>
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
-        </div>
-      </section>
 
-      <section className="py-20 md:py-28 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-4">
-              See it in action
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Watch how AI transforms your pull request reviews from hours to
-              minutes.
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <Card className="border border-border shadow-lg">
-              <CardHeader className="border-b border-border bg-muted/30">
+          <div className="max-w-5xl mx-auto mt-16">
+            <div className="border border-border bg-card overflow-hidden shadow-lg">
+              <div className="border-b border-border bg-muted/50 px-8 py-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <GitPullRequest className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background">
+                      <GitPullRequest className="h-5 w-5 text-foreground" />
+                    </div>
                     <div>
-                      <CardTitle className="text-lg">
+                      <h3 className="text-lg font-semibold">
                         feat: Add user authentication
-                      </CardTitle>
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Pull Request #142 • opened 2 hours ago
                       </p>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-green-50 text-green-700 border-green-200"
-                  >
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    AI Reviewed
-                  </Badge>
+                  <div className="flex items-center">
+                    <div className="rounded-sm border border-border bg-muted/50 px-4 py-2">
+                      <span className="text-xs font-medium">AI Reviewed</span>
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
+              </div>
 
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {/* Code Diff */}
-                  <div className="bg-muted/50 rounded-lg p-4 font-mono text-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-muted-foreground">
+              <div className="p-8">
+                <div className="space-y-8">
+                  <div className="bg-muted/30 rounded-md p-6 font-mono text-sm">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-muted-foreground font-medium">
                         src/auth/login.ts
                       </span>
-                      <Badge variant="secondary" className="text-xs">
-                        +45 -12
-                      </Badge>
+                      <div className="rounded-full border border-border bg-muted/50 px-3 py-1">
+                        <span className="text-xs font-medium">+45 -12</span>
+                      </div>
                     </div>
 
                     <div className="space-y-1">
@@ -286,12 +314,12 @@ export function MainPage() {
                         </span>
                         <span className="text-red-600 line-through">
                           - const response = await fetch(&apos;/api/login&apos;,{" "}
-                          {"{"}
+                          {})
                         </span>
                       </div>
                       <div className="flex bg-green-500/10">
                         <span className="w-8 text-green-600 text-right pr-4">
-                          30
+                          31
                         </span>
                         <span className="text-green-600">
                           + const response = await auth.signIn(email, password)
@@ -300,284 +328,179 @@ export function MainPage() {
                     </div>
                   </div>
 
-                  {/* AI Comment */}
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                        <Bot className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            AI Assistant
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            Security
-                          </Badge>
+                  <div className="flex items-center justify-between pt-8 border-t border-border">
+                    <div className="flex items-center gap-8 text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background">
+                          <Bot className="h-4 w-4 text-foreground" />
                         </div>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-sm text-blue-900 leading-relaxed">
-                            <strong>Security Improvement:</strong> Good catch on
-                            using the auth service instead of direct API calls!
-                            This ensures proper token handling and CSRF
-                            protection. However, I noticed you are storing the
-                            password in state - consider clearing it after
-                            submission for better security.
+                        <div>
+                          <p className="font-medium text-foreground">
+                            AI analyzed
                           </p>
-                          <div className="mt-3 flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs h-7"
-                            >
-                              Apply suggestion
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-xs h-7"
-                            >
-                              Dismiss
-                            </Button>
-                          </div>
+                          <p className="text-muted-foreground">in 3.2s</p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
-                        <AlertTriangle className="h-4 w-4 text-orange-600" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            AI Assistant
-                          </span>
-                          <Badge variant="destructive" className="text-xs">
-                            Bug
-                          </Badge>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         </div>
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                          <p className="text-sm text-orange-900 leading-relaxed">
-                            <strong>Potential Issue:</strong> The form
-                            doesn&apos;t validate email format before
-                            submission. Consider adding email validation to
-                            prevent invalid submissions.
+                        <div>
+                          <p className="font-medium text-foreground">
+                            3 suggestions
                           </p>
+                          <p className="text-muted-foreground">provided</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg ">
+                          <AlertTriangle className="h-4 w-4 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">1 issue</p>
+                          <p className="text-muted-foreground">found</p>
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            AI Assistant
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-green-100 text-green-700"
-                          >
-                            Best Practice
-                          </Badge>
-                        </div>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <p className="text-sm text-green-900 leading-relaxed">
-                            <strong>Excellent:</strong> Great use of TypeScript
-                            types and async/await pattern. The code is clean and
-                            follows React best practices.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Summary Stats */}
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Bot className="h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">
-                          AI analyzed in 3.2s
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-muted-foreground">
-                          3 suggestions
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-600" />
-                        <span className="text-muted-foreground">
-                          1 potential issue
-                        </span>
-                      </div>
-                    </div>
-                    <Button size="sm">View full analysis</Button>
+                    <Button size="lg" className="h-12 px-6">
+                      View full analysis
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-4">
+      <section className="py-24 bg-background">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl leading-tighter tracking-tighter mb-4 sm:text-4xl lg:text-5xl">
               Simple, transparent pricing
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto sm:text-xl leading-relaxed">
               Choose the perfect plan for your needs. Start free and scale as
               you grow.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {plans.map((plan, index) => (
-              <Card
+              <div
                 key={index}
-                className={`relative bg-card border transition-all duration-200 hover:shadow-lg hover:translate-y-[-4px] ${
+                className={`relative border transition-all duration-300 ${
                   plan.highlighted
-                    ? "border-primary shadow-lg ring-2 ring-primary/20"
-                    : "border-border hover:border-primary/20"
+                    ? "border-foreground  shadow-xl scale-105"
+                    : "border-border bg-muted/5 hover:border-foreground/20 hover:shadow-lg"
                 }`}
               >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                      <Star className="h-3 w-3 mr-1" />
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-
-                <CardHeader className="text-center pb-6">
-                  <div className="space-y-2">
-                    <CardTitle className="text-2xl font-bold">
-                      {plan.name}
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">
-                      {plan.description}
-                    </p>
-                  </div>
-                  <div className="pt-4">
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold">{plan.price}</span>
-                      <span className="text-muted-foreground">
-                        {plan.period}
-                      </span>
+                <div className="p-10">
+                  {plan.highlighted && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <div className="inline-flex items-center rounded-full border border-border bg-foreground px-4 py-2">
+                        <span className="text-sm font-medium text-background">
+                          Most Popular
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
+                  )}
 
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    <Button
-                      className={`w-full ${
-                        plan.highlighted
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      }`}
-                      size="lg"
-                    >
-                      {plan.price === "$0" ? "Get Started" : "Start Free Trial"}
-                    </Button>
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <h3 className="text-3xl font-bold">{plan.name}</h3>
+                      <p className="text-muted-foreground text-lg">
+                        {plan.description}
+                      </p>
+                    </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-6">
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-5xl font-bold">{plan.price}</span>
+                        <span className="text-muted-foreground text-lg">
+                          {plan.period}
+                        </span>
+                      </div>
+
+                      <Button
+                        className={`w-full ${
+                          plan.highlighted
+                            ? "bg-foreground text-background hover:bg-muted-foreground"
+                            : "bg-foreground text-background hover:bg-muted/20"
+                        }`}
+                        size="lg"
+                      >
+                        Get started
+                      </Button>
+                    </div>
+
+                    <div className="space-y-4">
                       {plan.features.map((feature, featureIndex) => (
                         <div
                           key={featureIndex}
-                          className="flex items-start gap-3"
+                          className="flex items-start gap-4"
                         >
-                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-foreground">
+                          <Check className="h-5 w-5 text-foreground mt-0.5 flex-shrink-0" />
+                          <span className="text-base text-muted-foreground">
                             {feature}
                           </span>
                         </div>
                       ))}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-muted-foreground text-sm">
-              All plans include core features. No hidden fees. Cancel anytime.
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-background">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="space-y-8">
-            <div className="flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Zap className="h-8 w-8 text-primary" />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
+      <section className="py-24 bg-background">
+        <div className="max-w-5xl mx-auto px-8 text-center">
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <h2 className="text-3xl leading-tighter tracking-tighter sm:text-4xl lg:text-5xl">
                 Ship better code faster
               </h2>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Join thousands of developers who are already using AI to review
-                pull requests in seconds, not hours.
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto sm:text-xl leading-tight">
+                Join hundreds of developers who are already using AI <br /> to
+                review pull requests in seconds, not hours.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[200px]"
+                onClick={handleStartReviewing}
+                className="h-14 px-8 text-base font-medium bg-foreground text-background hover:bg-muted-foreground min-w-[220px] transition-all hover:scale-105"
               >
                 Start reviewing for free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg" className="min-w-[200px]">
-                Schedule demo
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <span>✓ No credit card required</span>
-              <span>•</span>
-              <span>✓ Setup in 2 minutes</span>
-              <span>•</span>
-              <span>✓ Cancel anytime</span>
             </div>
           </div>
         </div>
       </section>
 
       <footer className="border-t border-border bg-background">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="max-w-7xl mx-auto px-8 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-12">
             <div className="col-span-2 md:col-span-1">
-              <h3 className="font-semibold text-lg mb-4">AI Code Review</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <h3 className="font-semibold text-xl mb-6">AI Code Review</h3>
+              <p className="text-muted-foreground text-base leading-relaxed">
                 Review pull requests in seconds with AI. Ship better code,
                 faster.
               </p>
             </div>
 
             <div>
-              <h4 className="font-medium text-sm mb-4">Product</h4>
-              <ul className="space-y-2">
+              <h4 className="font-medium text-base mb-6">Product</h4>
+              <ul className="space-y-3">
                 {footerLinks.product.map((link, index) => (
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
                     >
                       {link.name}
                     </a>
@@ -587,13 +510,13 @@ export function MainPage() {
             </div>
 
             <div>
-              <h4 className="font-medium text-sm mb-4">Company</h4>
-              <ul className="space-y-2">
+              <h4 className="font-medium text-base mb-6">Company</h4>
+              <ul className="space-y-3">
                 {footerLinks.company.map((link, index) => (
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
                     >
                       {link.name}
                     </a>
@@ -603,13 +526,13 @@ export function MainPage() {
             </div>
 
             <div>
-              <h4 className="font-medium text-sm mb-4">Legal</h4>
-              <ul className="space-y-2">
+              <h4 className="font-medium text-base mb-6">Legal</h4>
+              <ul className="space-y-3">
                 {footerLinks.legal.map((link, index) => (
                   <li key={index}>
                     <a
                       href={link.href}
-                      className="text-muted-foreground text-sm hover:text-foreground transition-colors"
+                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
                     >
                       {link.name}
                     </a>
@@ -619,13 +542,13 @@ export function MainPage() {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-border">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-muted-foreground text-sm">
-                © 2024 AI Code Review. All rights reserved.
+          <div className="mt-16 pt-8 border-t border-border">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <p className="text-muted-foreground text-base">
+                © 2026 AI Code Review. All rights reserved.
               </p>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 {socialLinks.map((social, index) => {
                   const Icon = social.icon;
                   return (
@@ -635,7 +558,7 @@ export function MainPage() {
                       className="text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={social.name}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-6 w-6" />
                     </a>
                   );
                 })}

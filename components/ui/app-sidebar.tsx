@@ -54,7 +54,6 @@ const AppSideBar = () => {
 
   return (
     <Sidebar collapsible="icon">
-
       <SidebarHeader className="border-b">
         <div className="flex items-center justify-between px-3 py-3">
           {!isCollapsed && (
@@ -76,11 +75,9 @@ const AppSideBar = () => {
         </div>
       </SidebarHeader>
 
-          
       <SidebarContent>
         {navigationConfig.map((section: NavigationSection) => (
           <div key={section.title} className="px-2 py-2">
-          
             {!isCollapsed && (
               <p className="px-2 mb-2 text-[10px] font-medium tracking-wider text-muted-foreground/70">
                 {section.title}
@@ -143,18 +140,14 @@ const AppSideBar = () => {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="border-t mt-auto pt-3">
-        <div className="px-2 pb-2 space-y-2">
+      <SidebarFooter className="mt-auto border-t pt-4">
+        <div className="space-y-1 px-2 pb-2">
+          {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleThemeToggle}
-            className={`
-              flex items-center gap-2 rounded-md px-2 py-1.5
-              text-muted-foreground
-              hover:bg-muted/50 hover:text-foreground
-              transition-all duration-200
-            `}
+            className="w-full justify-start gap-2 rounded-md px-2 py-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
           >
             {theme === "dark" ? (
               <Moon className="h-4 w-4" />
@@ -172,17 +165,18 @@ const AppSideBar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div
+                role="button"
+                tabIndex={0}
                 className={`
-                  flex items-center gap-2 rounded-md px-2 py-1.5
-                  cursor-pointer
-                  hover:bg-muted/50
-                  transition-all duration-200
-                `}
+        w-full flex items-center rounded-md px-2 py-1.5
+      `}
               >
-                <UserButton user={user} />
+                <div className="flex-shrink-0">
+                  <UserButton user={user} />
+                </div>
 
                 {!isCollapsed && (
-                  <div className="flex flex-col leading-tight min-w-0">
+                  <div className="ml-3 flex flex-col leading-tight min-w-0">
                     <span className="text-sm font-medium truncate">
                       {username}
                     </span>
