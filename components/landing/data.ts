@@ -174,11 +174,6 @@ export const navigationConfig: NavigationSection[] = [
         url: "/dashboard/subscription",
         icon: CreditCard,
       },
-      {
-        title: "Settings",
-        url: "/dashboard/settings",
-        icon: Settings,
-      },
     ],
   },
 ];

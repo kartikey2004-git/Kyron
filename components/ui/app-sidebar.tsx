@@ -1,10 +1,9 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
-import { Github, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
+import { Github, Moon, Sun } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +23,7 @@ import Link from "next/link";
 import UserButton from "@/modules/auth/components/user-button";
 import { navigationConfig } from "../landing/data";
 import type { NavigationItem, NavigationSection } from "@/types/navigation";
+import { useUserProfile } from "@/modules/settings/hooks/use-user-profile";
 
 const AppSideBar = () => {
   const { theme, setTheme } = useTheme();
@@ -31,7 +31,7 @@ const AppSideBar = () => {
   const [mounted, setMounted] = useState(false);
   const { state } = useSidebar();
 
-  const { data: session } = useSession();
+  const { data: user, isLoading: isUserLoading } = useUserProfile();
 
   useEffect(() => {
     setMounted(true);
@@ -41,9 +41,8 @@ const AppSideBar = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
-  if (!mounted || !session) return null;
+  if (!mounted || isUserLoading || !user) return null;
 
-  const user = session.user;
   const username = user.name || "Guest";
   const userEmail = user.email || "";
 
@@ -150,7 +149,7 @@ const AppSideBar = () => {
                 className={`w-full flex items-center rounded-md px-2 py-1.5`}
               >
                 <div className="flex-shrink-0">
-                  <UserButton user={user} />
+                  <UserButton />
                 </div>
 
                 {!isCollapsed && (
