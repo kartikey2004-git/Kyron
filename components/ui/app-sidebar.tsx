@@ -142,41 +142,19 @@ const AppSideBar = () => {
 
       <SidebarFooter className="mt-auto border-t pt-4">
         <div className="space-y-1 px-2 pb-2">
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleThemeToggle}
-            className="w-full justify-start gap-2 rounded-md px-2 py-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-          >
-            {theme === "dark" ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
-
-            {!isCollapsed && (
-              <span className="text-sm">
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </span>
-            )}
-          </Button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div
                 role="button"
                 tabIndex={0}
-                className={`
-        w-full flex items-center rounded-md px-2 py-1.5
-      `}
+                className={`w-full flex items-center rounded-md px-2 py-1.5`}
               >
                 <div className="flex-shrink-0">
                   <UserButton user={user} />
                 </div>
 
                 {!isCollapsed && (
-                  <div className="ml-3 flex flex-col leading-tight min-w-0">
+                  <div className="ml-3 flex flex-col leading-tight min-w-0 flex-1">
                     <span className="text-sm font-medium truncate">
                       {username}
                     </span>
@@ -185,6 +163,19 @@ const AppSideBar = () => {
                     </span>
                   </div>
                 )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleThemeToggle}
+                  className="flex-shrink-0 h-8 w-8 p-0 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </DropdownMenuTrigger>
           </DropdownMenu>
