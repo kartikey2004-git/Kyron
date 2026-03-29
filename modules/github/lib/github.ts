@@ -92,3 +92,28 @@ export const fetchUserContributions = async (
   }
 };
 
+// Fetching user both public and private repositories with pagination
+export const getUserRepositories = async (
+  page: number = 1,
+  perPage: number = 10,
+) => {
+  // Getting the github access token and constructing octokit instance
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+      sort: "updated",
+      direction: "desc",
+      visibility: "all",
+      page: page,
+      per_page: perPage,
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching user repositories:", error);
+    throw error;
+  }
+};

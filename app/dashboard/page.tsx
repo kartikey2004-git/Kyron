@@ -30,10 +30,8 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-            Dashboard
-          </h1>
+        <div className="max-w-7xl mx-auto -mt-10 py-8">
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Track your coding activity and contributions
           </p>
