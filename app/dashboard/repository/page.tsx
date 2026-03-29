@@ -7,6 +7,7 @@ import { RepositoryHeader } from "@/modules/repository/components/repository-hea
 import { RepositorySearch } from "@/modules/repository/components/repository-search";
 import { RepositoryGrid } from "@/modules/repository/components/repository-grid";
 import { SkeletonCard } from "@/modules/repository/components/skeleton-card";
+import { useConnectRepository } from "@/modules/repository/hooks/use-connect-repository";
 
 const RepositoryPage = () => {
   const {
@@ -17,6 +18,8 @@ const RepositoryPage = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useRepositories();
+
+  const { mutate: connectRepository } = useConnectRepository();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [localConnectingId, setLocalConnectingId] = useState<number | null>(
@@ -56,7 +59,22 @@ const RepositoryPage = () => {
 
   const handleConnectRepo = (repo: Repository) => {
     setLocalConnectingId(repo.id);
-    // TODO: Implement connect repository logic
+
+    connectRepository(
+      {
+        owner: repo.full_name.split("/")[0],
+        githubId: repo.id,
+        repo: repo.name,
+      },
+      {
+        onSuccess: () => {
+          setLocalConnectingId(null);
+        },
+        onError: () => {
+          setLocalConnectingId(null);
+        },
+      },
+    );
   };
 
   return (
