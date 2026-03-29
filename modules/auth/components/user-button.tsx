@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { LogOut, Settings, CreditCard, User as UserIcon } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  CreditCard,
+  User as UserIcon,
+  Edit,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ProfileEditDialog from "@/modules/settings/components/profile-edit-dialog";
 
 import { signOut } from "@/lib/auth-client";
 import {
@@ -23,25 +30,13 @@ import {
   formatMemberSince,
   getUserInitials,
 } from "../utils/user-utils";
-
-// Type defines shape of user data object
-export interface UserData {
-  id: string;
-  email: string | null;
-  name: string | null;
-  image?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { useUserProfile } from "@/modules/settings/hooks/use-user-profile";
 
 // Props accepted by this component
 interface UserButtonProps {
-  user: UserData | null; // user info, or null if not logged in
   onLogout?: () => void | Promise<void>; //callback for logout
 
   // open settings, profile, billing handler
-
-  onSettings?: () => void;
   onProfile?: () => void;
   onBilling?: () => void;
 
@@ -55,9 +50,7 @@ interface UserButtonProps {
 }
 
 export default function UserButton({
-  user,
   // onLogout,
-  onSettings,
   onProfile,
   onBilling,
   showBadge = false,
@@ -73,6 +66,9 @@ export default function UserButton({
   // This hook allows you to programmatically change routes inside Client Component.
 
   const router = useRouter();
+
+  // Get user profile from database
+  const { data: user, isLoading: isProfileLoading, error } = useUserProfile();
 
   // Actual sign out logic using your auth client , grab signOut function which comes from authClient
 
@@ -101,8 +97,8 @@ export default function UserButton({
     }
   };
 
-  // If no user logged in, render nothing
-  if (!user) {
+  // If no user logged in or loading, render nothing or loading state
+  if (isProfileLoading || error || !user) {
     return null;
   }
 
@@ -165,13 +161,27 @@ export default function UserButton({
             </div>
             {showMemberSince && (
               <p className="text-xs text-muted-foreground">
-                Member since {formatMemberSince(user.createdAt)}
+                Member since {formatMemberSince(new Date(user.createdAt))}
               </p>
             )}
           </div>
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
+
+        <ProfileEditDialog
+          profile={user}
+          isLoading={isProfileLoading}
+          error={error}
+        >
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={(e) => e.preventDefault()}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Profile
+          </DropdownMenuItem>
+        </ProfileEditDialog>
 
         {onProfile && (
           <DropdownMenuItem onClick={onProfile} className="cursor-pointer">
@@ -184,13 +194,6 @@ export default function UserButton({
           <DropdownMenuItem onClick={onBilling} className="cursor-pointer">
             <CreditCard className="mr-2 h-4 w-4" />
             Billing
-          </DropdownMenuItem>
-        )}
-
-        {onSettings && (
-          <DropdownMenuItem onClick={onSettings} className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
           </DropdownMenuItem>
         )}
 
