@@ -24,5 +24,8 @@ export const useUserProfile = () => {
         updatedAt: result.updatedAt.toISOString(),
       };
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes - cache for 5 minutes
+
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus - user data doesn't change frequently
   });
 };
