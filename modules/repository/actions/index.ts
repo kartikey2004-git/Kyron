@@ -1,5 +1,6 @@
 "use server";
 
+import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import {
@@ -81,6 +82,19 @@ export const connectRepository = async (
   // TODO: INCREMENT THE USER'S REPOSITORY COUNT FOR USAGE TRACKING
 
   // TRIGGER REPOSITORY INDEXING USING RAG(FIRE AND FORGOT)
+
+  try {
+    await inngest.send({
+      name: "repository.connected",
+      data:{
+        owner: owner,
+        repo: repo,
+        userId: session.user.id
+      }
+    })
+  } catch (error) {
+    console.error("Failed to trigger repository indexing")
+  }
 
   return webhook
 };
