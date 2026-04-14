@@ -3,8 +3,19 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ExternalLink, Github, Loader2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import { ConnectedRepository } from "../hooks/use-connected-repositories";
 
 interface RepositoryItemProps {
@@ -18,13 +29,13 @@ const RepositoryItem: React.FC<RepositoryItemProps> = ({
   onDisconnect,
   isDisconnecting,
 }) => {
-  const [owner, repoName] = repository.fullName.split('/');
+  const [owner, repoName] = repository.fullName.split("/");
 
   return (
     <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
-          <Github className="h-5 w-5 text-muted-foreground" />
+          <FaGithub className="h-5 w-5 text-muted-foreground" />
         </div>
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
@@ -34,7 +45,9 @@ const RepositoryItem: React.FC<RepositoryItemProps> = ({
             </Badge>
           </div>
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>Connected {new Date(repository.createdAt).toLocaleDateString()}</span>
+            <span>
+              Connected {new Date(repository.createdAt).toLocaleDateString()}
+            </span>
             <a
               href={repository.url}
               target="_blank"
@@ -47,7 +60,7 @@ const RepositoryItem: React.FC<RepositoryItemProps> = ({
           </div>
         </div>
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -68,8 +81,9 @@ const RepositoryItem: React.FC<RepositoryItemProps> = ({
             <AlertDialogHeader>
               <AlertDialogTitle>Disconnect repository?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove <strong>{repository.fullName}</strong> from your account and delete its webhook from GitHub. 
-                You'll need to reconnect it manually if you want to use it again.
+                This will remove <strong>{repository.fullName}</strong> from
+                your account and delete its webhook from GitHub. You'll need to
+                reconnect it manually if you want to use it again.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

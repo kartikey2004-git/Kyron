@@ -7,12 +7,12 @@ import {
   Code2,
   CreditCard,
   GitBranch,
-  Github,
-  Linkedin,
+  GitPullRequest,
+  Link,
   MessageSquare,
   Settings,
   Shield,
-  Twitter,
+  X,
   Zap,
 } from "lucide-react";
 
@@ -135,13 +135,13 @@ export const socialLinks = [
   {
     name: "GitHub",
     href: "https://github.com/kartikey2004-git/AI-Code-Review",
-    icon: Github,
+    icon: GitPullRequest,
   },
-  { name: "Twitter", href: "https://x.com/kartikeybuilds", icon: Twitter },
+  { name: "Twitter", href: "https://x.com/kartikeybuilds", icon: X },
   {
     name: "LinkedIn",
     href: "https://www.linkedin.com/in/kartikey-bhatnagar-2702a4337",
-    icon: Linkedin,
+    icon: Link,
   },
 ];
 
@@ -157,7 +157,7 @@ export const navigationConfig: NavigationSection[] = [
       {
         title: "Repository",
         url: "/dashboard/repository",
-        icon: Github,
+        icon: GitPullRequest,
       },
       {
         title: "Reviews",

@@ -1,7 +1,8 @@
 "use client";
 
 import { signIn } from "@/lib/auth-client";
-import { GithubIcon, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import React, { useState } from "react";
 import { useTheme } from "next-themes";
 
@@ -48,7 +49,7 @@ export default function LoginForm() {
           <Moon className="h-5 w-5 text-foreground" />
         )}
       </button>
-      
+
       <div className="hidden md:flex flex-col justify-between p-12 border-r border-border">
         <div className="space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">
@@ -119,7 +120,7 @@ export default function LoginForm() {
                 </span>
               ) : (
                 <>
-                  <GithubIcon size={18} />
+                  <FaGithub size={18} />
                   <span>Continue with GitHub</span>
                 </>
               )}

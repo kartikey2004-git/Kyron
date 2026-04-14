@@ -20,7 +20,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Github, Loader2, Unlink } from "lucide-react";
+import { Loader2, Unlink } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import { useConnectedRepositories } from "../hooks/use-connected-repositories";
 import {
   useDisconnectRepository,
@@ -112,7 +113,7 @@ const RepoList: React.FC<RepoListProps> = ({ className }) => {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Github className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <FaGithub className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">
               No connected repositories
             </h3>

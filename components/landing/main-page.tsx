@@ -4,6 +4,10 @@ import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import {
+  useModeAnimation,
+  ThemeAnimationType,
+} from "react-theme-switch-animation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +16,6 @@ import {
   Bot,
   Check,
   CheckCircle,
-  Github,
   GitPullRequest,
   Moon,
   Star,
@@ -35,6 +38,18 @@ export function MainPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Theme switch animation hook
+  const {
+    ref: themeButtonRef,
+    toggleSwitchTheme,
+    isDarkMode,
+  } = useModeAnimation({
+    animationType: ThemeAnimationType.CIRCLE,
+    duration: 400,
+    easing: "ease-in-out",
+    globalClassName: "dark",
+  });
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -48,7 +63,7 @@ export function MainPage() {
   };
 
   const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    toggleSwitchTheme();
   };
 
   return (
@@ -64,11 +79,12 @@ export function MainPage() {
 
           {mounted && (
             <button
+              ref={themeButtonRef}
               onClick={handleThemeToggle}
               className="flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-background hover:bg-muted transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? (
+              {isDarkMode ? (
                 <Sun className="h-3 w-3" />
               ) : (
                 <Moon className="h-3 w-3" />
