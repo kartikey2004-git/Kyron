@@ -3,7 +3,12 @@
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { Github, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
+import {
+  useModeAnimation,
+  ThemeAnimationType,
+} from "react-theme-switch-animation";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +36,18 @@ const AppSideBar = () => {
   const [mounted, setMounted] = useState(false);
   const { state } = useSidebar();
 
+  // Theme switch animation hook
+  const {
+    ref: themeButtonRef,
+    toggleSwitchTheme,
+    isDarkMode,
+  } = useModeAnimation({
+    animationType: ThemeAnimationType.CIRCLE,
+    duration: 400,
+    easing: "ease-in-out",
+    globalClassName: "dark",
+  });
+
   const { data: user, isLoading: isUserLoading } = useUserProfile();
 
   useEffect(() => {
@@ -38,8 +55,8 @@ const AppSideBar = () => {
   }, []);
 
   const handleThemeToggle = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [theme, setTheme]);
+    toggleSwitchTheme();
+  }, [toggleSwitchTheme]);
 
   if (!mounted || isUserLoading || !user) return null;
 
@@ -58,7 +75,7 @@ const AppSideBar = () => {
           {!isCollapsed && (
             <div className="flex items-center gap-2 min-w-0">
               <div className="flex h-8 w-8 items-center justify-center bg-muted rounded-md">
-                <Github className="h-4 w-4" />
+                <FaGithub className="h-4 w-4" />
               </div>
 
               <div className="flex flex-col leading-tight min-w-0">
@@ -164,12 +181,13 @@ const AppSideBar = () => {
                 )}
 
                 <Button
+                  ref={themeButtonRef}
                   variant="ghost"
                   size="sm"
                   onClick={handleThemeToggle}
                   className="flex-shrink-0 h-8 w-8 p-0 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                 >
-                  {theme === "dark" ? (
+                  {isDarkMode ? (
                     <Sun className="h-4 w-4" />
                   ) : (
                     <Moon className="h-4 w-4" />
