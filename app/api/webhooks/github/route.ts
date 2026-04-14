@@ -8,13 +8,12 @@ export async function POST(request: NextRequest) {
     const event = request.headers.get("x-github-event");
 
     if (event === "ping") {
+      console.log("Ping webhook received");
       return NextResponse.json(
         { message: "Webhook received" },
         { status: 200 },
       );
     }
-
-    console.log("Webhook received:", event);
 
     // HANDLE PULL REQUEST EVENTS
 
@@ -23,18 +22,28 @@ export async function POST(request: NextRequest) {
       const repo = body.repository?.full_name;
       const prNumber = body.number;
 
-      const [owner,repoName] = repo.split("/")
+      const [owner, repoName] = repo.split("/");
 
-      if (action === "open" || action === "synchronize") {
+      if (
+        action === "opened" ||
+        action === "synchronize" ||
+        action === "reopened"
+      ) {
         reviewPullRequest(owner, repoName, prNumber)
-          .then(() => console.log(`Review completed for ${repo} #${prNumber}`))
+          .then(() =>
+            console.log(
+              `Review request sent successfully for: ${repo} #${prNumber}`,
+            ),
+          )
           .catch((error) =>
-            console.log(`Review failed for {repo} #${prNumber}:`, error),
+            console.log(`Review failed for ${repo} #${prNumber}:`, error),
           );
+      } else {
+        console.log("Skipping PR action:", { action });
       }
     }
 
-    return NextResponse.json({ message: "Event processes" }, { status: 200 });
+    return NextResponse.json({ message: "Event processed" }, { status: 200 });
   } catch (error) {
     console.error("Webhook error:", error);
     return NextResponse.json({ message: "Webhook failed" }, { status: 500 });

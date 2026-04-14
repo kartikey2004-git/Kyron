@@ -117,7 +117,6 @@ export async function reviewPullRequest(
           },
         });
       }
-
     } catch (dbError) {
       console.error("Failed to create failed review record:", dbError);
     }
