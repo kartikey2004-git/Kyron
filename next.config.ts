@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
-    "69e4-2401-4900-8843-e01b-f1aa-b391-b277-775c.ngrok-free.app",
+    "7478-2401-4900-8847-9343-34f1-79c4-20f7-d98.ngrok-free.app",
     "localhost:3000",
   ],
 };

@@ -44,7 +44,10 @@ export const generateReview = inngest.createFunction(
       "retrieve-context",
       async () => {
         const query = `title: ${title}\n${description}`;
-        return await retrieveContext(query, `${owner}/${repo}`);
+
+        const result = await retrieveContext(query, `${owner}/${repo}`);
+        
+        return result;
       },
       {
         retries: 3,
