@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { NavigationSection } from "@/types/navigation";
 import {
   BookOpen,
@@ -7,14 +9,14 @@ import {
   Code2,
   CreditCard,
   GitBranch,
-  GitPullRequest,
-  Link,
   MessageSquare,
   Settings,
   Shield,
   X,
   Zap,
 } from "lucide-react";
+import { FiGithub } from "react-icons/fi";
+import { FaLinkedinIn } from "react-icons/fa";
 
 export const features = [
   {
@@ -63,7 +65,7 @@ export const features = [
 
 export const steps = [
   {
-    icon: GitBranch,
+    icon: FiGithub as any,
     title: "Connect GitHub",
     description:
       "Install our GitHub app in seconds. No complex setup required.",
@@ -135,13 +137,13 @@ export const socialLinks = [
   {
     name: "GitHub",
     href: "https://github.com/kartikey2004-git/AI-Code-Review",
-    icon: GitPullRequest,
+    icon: FiGithub as any,
   },
   { name: "Twitter", href: "https://x.com/kartikeybuilds", icon: X },
   {
     name: "LinkedIn",
     href: "https://www.linkedin.com/in/kartikey-bhatnagar-2702a4337",
-    icon: Link,
+    icon: FaLinkedinIn,
   },
 ];
 
@@ -157,7 +159,7 @@ export const navigationConfig: NavigationSection[] = [
       {
         title: "Repository",
         url: "/dashboard/repository",
-        icon: GitPullRequest,
+        icon: FiGithub as any,
       },
       {
         title: "Reviews",

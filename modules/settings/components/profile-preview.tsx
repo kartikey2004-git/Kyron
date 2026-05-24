@@ -49,7 +49,7 @@ const ProfilePreview = ({ profile, isLoading }: ProfilePreviewProps) => {
                 alt={profile.name || "User"}
                 className="object-cover"
               />
-              <AvatarFallback className="text-lg bg-gradient-to-br from-primary/10 to-primary/20">
+              <AvatarFallback className="text-lg bg-linear-to-br from-primary/10 to-primary/20">
                 {profile.name ? profile.name.charAt(0).toUpperCase() : "U"}
               </AvatarFallback>
             </Avatar>

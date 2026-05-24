@@ -1,4 +1,4 @@
-import { createAuthClient } from "better-auth/react"; //function that helps us create an authentication client
+import { createAuthClient } from "better-auth/react"; // function that helps us create an authentication client
 
 /*
 

@@ -143,22 +143,22 @@ export const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
         </div>
 
         <div className="flex gap-1.5">
-          <div className="flex flex-col gap-[2px] text-[10px] text-muted-foreground w-7 shrink-0 pt-px">
+          <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground w-7 shrink-0 pt-px">
             {["", "Mon", "", "Wed", "", "Fri", ""].map((day, i) => (
-              <div key={i} className="h-[11px] flex items-center justify-end">
+              <div key={i} className="h-2.75 flex items-center justify-end">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="flex gap-[2px]">
+          <div className="flex gap-0.5">
             {heatmapData.weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-[2px]">
+              <div key={weekIndex} className="flex flex-col gap-0.5">
                 {week.contributionDays.map((day) => (
                   <Tooltip key={day.date}>
                     <TooltipTrigger asChild>
                       <div
-                        className={`w-[11px] h-[11px] rounded-[2px] border border-border/20 cursor-default transition-transform hover:scale-125 ${getLevelColor(day.level)}`}
+                        className={`w-2.75 h-2.75 rounded-[2px] border border-border/20 cursor-default transition-transform hover:scale-125 ${getLevelColor(day.level)}`}
                       />
                     </TooltipTrigger>
                     <TooltipContent side="top">
@@ -191,7 +191,7 @@ export const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
             {[0, 1, 2, 3, 4].map((level) => (
               <div
                 key={level}
-                className={`w-[11px] h-[11px] rounded-[2px] border border-border/20 ${getLevelColor(level)}`}
+                className={`w-2.75 h-2.75 rounded-[2px] border border-border/20 ${getLevelColor(level)}`}
               />
             ))}
             <span>More</span>

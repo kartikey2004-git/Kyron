@@ -48,7 +48,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
   return (
     <>
       <Card className="flex flex-col h-full hover:shadow-md transition-shadow">
-        <CardHeader className="px-5 py-4 space-y-3">
+        <CardHeader className="px-4 py-3 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <GitPullRequest className="h-3.5 w-3.5 text-muted-foreground" />
@@ -87,7 +87,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
 
         <Separator />
 
-        <CardContent className="px-5 py-4 space-y-3 flex-1">
+        <CardContent className="px-4 py-3 space-y-2 flex-1">
           <div className="prose prose-xs max-w-none dark:prose-invert prose-p:leading-relaxed prose-headings:font-semibold prose-code:text-xs prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline line-clamp-6">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

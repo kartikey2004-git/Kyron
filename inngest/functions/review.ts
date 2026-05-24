@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { inngest } from "@/inngest/client";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
@@ -33,11 +35,11 @@ export const generateReview = inngest.createFunction(
           account.accessToken,
           owner,
           repo,
-          prNumber,
+          prNumber
         );
 
         return { ...data, token: account.accessToken };
-      },
+      }
     );
 
     const context = await step.run(
@@ -46,13 +48,13 @@ export const generateReview = inngest.createFunction(
         const query = `title: ${title}\n${description}`;
 
         const result = await retrieveContext(query, `${owner}/${repo}`);
-        
+
         return result;
       },
       {
         retries: 3,
         retryDelay: 1000,
-      },
+      }
     );
 
     const review = await step.run("generate-ai-review", async () => {
@@ -166,5 +168,5 @@ RESPONSE FORMAT:
     });
 
     return { success: true };
-  },
+  }
 );

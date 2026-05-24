@@ -23,7 +23,7 @@ import { getPullRequestDiff } from "@/modules/github/lib/github";
 export async function reviewPullRequest(
   owner: string,
   repo: string,
-  prNumber: number,
+  prNumber: number
 ) {
   try {
     // Find the repository where the owner and repo match and the user has a github account
@@ -48,7 +48,7 @@ export async function reviewPullRequest(
 
     if (!repository) {
       throw new Error(
-        `Repository ${owner}/${repo} not found in our database. Please reconnect the repository in your settings.`,
+        `Repository ${owner}/${repo} not found in our database. Please reconnect the repository in your settings.`
       );
     }
 
@@ -58,7 +58,7 @@ export async function reviewPullRequest(
 
     if (!githubAccount) {
       throw new Error(
-        `No GitHub account found for user. Please reconnect your GitHub account in your settings.`,
+        `No GitHub account found for user. Please reconnect your GitHub account in your settings.`
       );
     }
 
@@ -71,12 +71,7 @@ export async function reviewPullRequest(
     }
 
     // Get the pull request diff and metadata
-    const { diff, title, description } = await getPullRequestDiff(
-      token,
-      owner,
-      repo,
-      prNumber,
-    );
+    await getPullRequestDiff(token, owner, repo, prNumber);
 
     // Send the review request to inngest
     await inngest.send({
@@ -101,7 +96,7 @@ export async function reviewPullRequest(
 
       if (!repository) {
         throw new Error(
-          `Repository ${owner}/${repo} not found in our database. Please reconnect the repository in your settings.`,
+          `Repository ${owner}/${repo} not found in our database. Please reconnect the repository in your settings.`
         );
       }
 

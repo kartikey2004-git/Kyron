@@ -48,7 +48,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
           <Link
             href={repo.html_url}
             target="_blank"
-            className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
+            className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             <ExternalLink className="h-4 w-4" />
           </Link>
@@ -60,7 +60,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
         </p>
 
         {/* Description */}
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 min-h-[2.75rem]">
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 min-h-11">
           {repo.description ?? (
             <span className="opacity-50">No description provided</span>
           )}

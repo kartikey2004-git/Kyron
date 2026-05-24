@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import React from "react";
-import { Separator } from "@/components/ui/separator";
 import AppSideBar from "@/components/ui/app-sidebar";
 import { cn } from "@/lib/utils";
 import { requireAuthenticated } from "@/modules/auth/utils/auth-utils";
