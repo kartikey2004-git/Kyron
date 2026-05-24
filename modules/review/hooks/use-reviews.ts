@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Review } from "../types";
 import { getReviews } from "../actions";
 
 export const useReviews = () => {

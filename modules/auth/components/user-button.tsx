@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import {
   LogOut,
-  Settings,
   CreditCard,
   User as UserIcon,
   Edit,

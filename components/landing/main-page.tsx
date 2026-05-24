@@ -2,41 +2,28 @@
 
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import {
   useModeAnimation,
   ThemeAnimationType,
 } from "react-theme-switch-animation";
-
 import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
   ArrowRight,
   Bot,
-  Check,
   CheckCircle,
   GitPullRequest,
   Moon,
-  Star,
   Sun,
-  Zap,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { features, footerLinks, plans, socialLinks, steps } from "./data";
+import { features, footerLinks, socialLinks, steps } from "./data";
+import { useMounted } from "@/hooks/use-mounted";
 
 export function MainPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+
+  const mounted = useMounted();
 
   // Theme switch animation hook
   const {
@@ -50,9 +37,21 @@ export function MainPage() {
     globalClassName: "dark",
   });
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  /*
+
+  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+    - Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. 
+    
+    In general, the body of an effect should do one or both of the following:
+       
+      - Update external systems with the latest state from React.
+      
+      - Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+  
+  Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended.
+  
+  */
 
   const handleStartReviewing = () => {
     if (session) {
@@ -106,7 +105,7 @@ export function MainPage() {
 
               <h1 className="text-4xl leading-tighter tracking-tight sm:text-5xl lg:text-6xl">
                 Review pull requests
-                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                   {" "}
                   in seconds
                 </span>
@@ -148,7 +147,7 @@ export function MainPage() {
             <h2 className="text-3xl leading-tighter tracking-tighter mb-8 sm:text-4xl lg:text-5xl">
               Everything you need for
               <br />
-              <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 smarter code reviews
               </span>
             </h2>
@@ -227,7 +226,7 @@ export function MainPage() {
                     </div>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden sm:block absolute top-8 left-full w-12 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent">
+                    <div className="hidden sm:block absolute top-8 left-full w-12 h-0.5 bg-linear-to-r from-transparent via-border to-transparent">
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-border"></div>
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-border"></div>
                     </div>
@@ -292,11 +291,9 @@ export function MainPage() {
                           const [email, setEmail] = useState(&apos;&apos;)
                         </span>
                       </div>
-                      <div className="flex bg-green-500/10">
-                        <span className="w-8 text-green-600 text-right pr-4">
-                          26
-                        </span>
-                        <span className="text-green-600">
+                      <div className="flex">
+                        <span className="w-8 text-right pr-4">26</span>
+                        <span className="">
                           + const [password, setPassword] =
                           useState(&apos;&apos;)
                         </span>
@@ -307,37 +304,27 @@ export function MainPage() {
                         </span>
                         <span className="text-muted-foreground"> </span>
                       </div>
-                      <div className="flex bg-green-500/10">
-                        <span className="w-8 text-green-600 text-right pr-4">
-                          28
-                        </span>
-                        <span className="text-green-600">
+                      <div className="flex">
+                        <span className="w-8 text-right pr-4">28</span>
+                        <span className="">
                           + const handleSubmit = async (e: React.FormEvent)
                           =&gt; {"{"}
                         </span>
                       </div>
-                      <div className="flex bg-green-500/10">
-                        <span className="w-8 text-green-600 text-right pr-4">
-                          29
-                        </span>
-                        <span className="text-green-600">
-                          + e.preventDefault()
-                        </span>
+                      <div className="flex ">
+                        <span className="w-8  text-right pr-4">29</span>
+                        <span className="">+ e.preventDefault()</span>
                       </div>
-                      <div className="flex bg-red-500/10">
-                        <span className="w-8 text-red-600 text-right pr-4">
-                          30
-                        </span>
-                        <span className="text-red-600 line-through">
+                      <div className="flex">
+                        <span className="w-8  text-right pr-4">30</span>
+                        <span className=" line-through">
                           - const response = await fetch(&apos;/api/login&apos;,{" "}
                           {})
                         </span>
                       </div>
-                      <div className="flex bg-green-500/10">
-                        <span className="w-8 text-green-600 text-right pr-4">
-                          31
-                        </span>
-                        <span className="text-green-600">
+                      <div className="flex ">
+                        <span className="w-8 text-right pr-4">31</span>
+                        <span className="">
                           + const response = await auth.signIn(email, password)
                         </span>
                       </div>
@@ -359,7 +346,7 @@ export function MainPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <CheckCircle className="h-4 w-4 " />
                         </div>
                         <div>
                           <p className="font-medium text-foreground">
@@ -370,7 +357,7 @@ export function MainPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg ">
-                          <AlertTriangle className="h-4 w-4 text-orange-600" />
+                          <AlertTriangle className="h-4 w-4" />
                         </div>
                         <div>
                           <p className="font-medium text-foreground">1 issue</p>
@@ -389,7 +376,7 @@ export function MainPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-background">
+      {/* <section className="py-24 bg-background">
         <div className="max-w-6xl mx-auto px-8">
           <div className="text-center mb-20">
             <h2 className="text-3xl leading-tighter tracking-tighter mb-4 sm:text-4xl lg:text-5xl">
@@ -456,7 +443,7 @@ export function MainPage() {
                           key={featureIndex}
                           className="flex items-start gap-4"
                         >
-                          <Check className="h-5 w-5 text-foreground mt-0.5 flex-shrink-0" />
+                          <Check className="h-5 w-5 text-foreground mt-0.5 shrink-0" />
                           <span className="text-base text-muted-foreground">
                             {feature}
                           </span>
@@ -469,7 +456,7 @@ export function MainPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="py-24 bg-background">
         <div className="max-w-5xl mx-auto px-8 text-center">
@@ -488,7 +475,7 @@ export function MainPage() {
               <Button
                 size="lg"
                 onClick={handleStartReviewing}
-                className="h-14 px-8 text-base font-medium bg-foreground text-background hover:bg-muted-foreground min-w-[220px] transition-all hover:scale-105"
+                className="h-14 px-8 text-base font-medium bg-foreground text-background hover:bg-muted-foreground min-w-55 transition-all hover:scale-105"
               >
                 Start reviewing for free
                 <ArrowRight className="ml-2 h-4 w-4" />

@@ -12,7 +12,7 @@ import { headers } from "next/headers";
 // Fetch user repositories from GitHub API and check which ones are connected to the user
 export const fetchUserRepositories = async (
   page: number = 1,
-  perPage: number = 10,
+  perPage: number = 10
 ) => {
   // Get the session from the request headers by calling the auth api
 
@@ -50,7 +50,7 @@ export const fetchUserRepositories = async (
 export const connectRepository = async (
   owner: string,
   githubId: number,
-  repo: string,
+  repo: string
 ) => {
   // Get the session from the request headers by calling the auth api
 
@@ -86,15 +86,15 @@ export const connectRepository = async (
   try {
     await inngest.send({
       name: "repository.connected",
-      data:{
+      data: {
         owner: owner,
         repo: repo,
-        userId: session.user.id
-      }
-    })
-  } catch (error) {
-    console.error("Failed to trigger repository indexing")
+        userId: session.user.id,
+      },
+    });
+  } catch {
+    console.error("Failed to trigger repository indexing");
   }
 
-  return webhook
+  return webhook;
 };

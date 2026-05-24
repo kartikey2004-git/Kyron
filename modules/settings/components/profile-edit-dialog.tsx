@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,22 +34,44 @@ const ProfileEditDialog = ({
 }: ProfileEditDialogProps) => {
   const [open, setOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+  /* Previously : duplicate derived state present 
+  
+  Right now:
+    
+   - profile already contains source data
+   - formData copies it through effect
+   - effect only exists to sync props → state
+
+  Then do the proper React pattern: remove duplicated derived state.
+
+  - Instead initialize/reset state directly when dialog opens.
+
+  Now:
+
+    - no syncing effect
+    - no cascading render warning
+    - no duplicated React lifecycle
+    - state updates happen from user events, not effects
+
+  */
+
+  const getInitialFormData = () => ({
+    name: profile?.name ?? "",
+    email: profile?.email ?? "",
   });
+
+  const [formData, setFormData] = useState(getInitialFormData);
 
   const queryClient = useQueryClient();
   const updateProfileMutation = useUpdateProfile();
 
-  useEffect(() => {
-    if (open && profile) {
-      setFormData({
-        name: profile.name ?? "",
-        email: profile.email ?? "",
-      });
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+
+    if (nextOpen) {
+      setFormData(getInitialFormData());
     }
-  }, [open, profile]);
+  };
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({
@@ -84,12 +106,12 @@ const ProfileEditDialog = ({
         onError: () => {
           toast.error("Failed to update profile");
         },
-      },
+      }
     );
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children || (
           <Button variant="ghost" size="sm" className="w-full justify-start">

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { inngest } from "@/inngest/client";
 import prisma from "@/lib/db";
 import { indexCodebase } from "@/modules/ai/lib/rag";
@@ -30,5 +32,5 @@ export const indexRepository = inngest.createFunction(
     });
 
     return { success: true, indexedFiles: files.length };
-  },
+  }
 );

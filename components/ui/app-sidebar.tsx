@@ -1,8 +1,7 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { Moon, Sun } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import {
@@ -29,11 +28,11 @@ import UserButton from "@/modules/auth/components/user-button";
 import { navigationConfig } from "../landing/data";
 import type { NavigationItem, NavigationSection } from "@/types/navigation";
 import { useUserProfile } from "@/modules/settings/hooks/use-user-profile";
+import { useMounted } from "@/hooks/use-mounted";
 
 const AppSideBar = () => {
-  const { theme, setTheme } = useTheme();
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const { state } = useSidebar();
 
   // Theme switch animation hook
@@ -50,10 +49,6 @@ const AppSideBar = () => {
 
   const { data: user, isLoading: isUserLoading } = useUserProfile();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const handleThemeToggle = useCallback(() => {
     toggleSwitchTheme();
   }, [toggleSwitchTheme]);
@@ -63,8 +58,15 @@ const AppSideBar = () => {
   const username = user.name || "Guest";
   const userEmail = user.email || "";
 
-  const isActive = (url: string) =>
-    pathname === url || pathname.startsWith(url);
+  const isActive = (url: string) => {
+    // Exact dashboard match only
+    if (url === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+
+    // Exact match OR nested child routes
+    return pathname === url || pathname.startsWith(`${url}/`);
+  };
 
   const isCollapsed = state === "collapsed";
 
@@ -123,9 +125,7 @@ const AppSideBar = () => {
 
                           hover:bg-muted/50 hover:text-foreground
 
-                          ${
-                            active ? "bg-muted text-foreground font-medium" : ""
-                          }
+                          ${active ? "text-foreground font-medium" : ""}
                         `}
                       >
                         <Link href={item.url}>
@@ -165,7 +165,7 @@ const AppSideBar = () => {
                 tabIndex={0}
                 className={`w-full flex items-center rounded-md px-2 py-1.5`}
               >
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <UserButton />
                 </div>
 
@@ -185,7 +185,7 @@ const AppSideBar = () => {
                   variant="ghost"
                   size="sm"
                   onClick={handleThemeToggle}
-                  className="flex-shrink-0 h-8 w-8 p-0 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                  className="shrink-0 h-8 w-8 p-0 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
                 >
                   {isDarkMode ? (
                     <Sun className="h-4 w-4" />
