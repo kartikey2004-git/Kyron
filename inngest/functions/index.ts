@@ -6,6 +6,8 @@ import path from "path";
 import os from "os";
 import { getFileContent, getRepoDiff } from "@/lib/git-utils";
 import { filterAndValidateFiles } from "@/lib/file-filter";
+import { chunkFileAST, CodeChunkDbInput } from "@/lib/ast-chunker";
+import { getGitBlameForLines } from "@/lib/git-blame";
 
 export const indexRepositoryHandler = async ({
   event,
@@ -56,8 +58,8 @@ export const indexRepositoryHandler = async ({
 
   if (!account?.accessToken) throw new Error("Missing GitHub token");
 
-  // Note: The repository is currently cloned into a temporary directory. 
-  
+  // Note: The repository is currently cloned into a temporary directory.
+
   // In a persistent worker architecture, a mounted volume would retain the repository state, enabling efficient incremental Git diff computation across executions.
 
   const repoDir = path.join(os.tmpdir(), `repo-${repository.id}`);
@@ -116,9 +118,44 @@ export const indexRepositoryHandler = async ({
     return files;
   });
 
-  return {
-    filesProcessed: filesToProcess.length,
-  };
+  const processedChunks = await step.run("ast-parse-and-blame", async () => {
+    const allChunks: CodeChunkDbInput[] = [];
+
+    for (const { filePath, content } of filesToProcess) {
+      // Chunk the file using Tree-sitter
+      const chunks = await chunkFileAST(filePath, content);
+
+      for (const chunk of chunks) {
+        // Pre-compute Git Blame for this specific chunk's line range
+        const blame = await getGitBlameForLines(
+          repoDir,
+          filePath,
+          chunk.startLine,
+          chunk.endLine
+        );
+
+        allChunks.push({
+          repoId: repository.id,
+          filePath: chunk.filePath,
+          startLine: chunk.startLine,
+          endLine: chunk.endLine,
+          language: path.extname(filePath).slice(1).toLowerCase(), // 'ts', 'py', etc.
+          content: chunk.content,
+          signature: chunk.signature,
+          imports: chunk.imports,
+          lastModifiedCommit: blame?.commitHash || null,
+          authorName: blame?.authorName || null,
+          // NOTE: We are NOT inserting the embedding yet.
+          // That happens in Step 4. We pass a placeholder or null for now.
+          embedding: undefined,
+        });
+      }
+    }
+
+    return allChunks;
+  });
+
+  return { chunksGenerated: processedChunks.length };
 };
 
 export const indexRepository = inngest.createFunction(
