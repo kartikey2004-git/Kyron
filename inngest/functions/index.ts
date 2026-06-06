@@ -8,6 +8,8 @@ import { getFileContent, getRepoDiff } from "@/lib/git-utils";
 import { filterAndValidateFiles } from "@/lib/file-filter";
 import { chunkFileAST, CodeChunkDbInput } from "@/lib/ast-chunker";
 import { getGitBlameForLines } from "@/lib/git-blame";
+import { chunkArray, generateEmbedding } from "@/lib/embedding";
+import { bulkInsertCodeChunks } from "@/lib/db-insert";
 
 export const indexRepositoryHandler = async ({
   event,
@@ -155,7 +157,64 @@ export const indexRepositoryHandler = async ({
     return allChunks;
   });
 
-  return { chunksGenerated: processedChunks.length };
+  const EMBEDDING_BATCH_SIZE = 15;
+
+  // Generate embeddings + insert into DB
+
+  await step.run("embed-and-insert-chunks", async () => {
+    if (processedChunks.length === 0) {
+      console.log("No chunks to embed");
+      return;
+    }
+
+    const batches = chunkArray(processedChunks, EMBEDDING_BATCH_SIZE);
+
+    console.log(
+      `[INDEX] Generating embeddings for ${processedChunks.length} chunks in ${batches.length} batches`
+    );
+
+    for (const [index, batch] of batches.entries()) {
+      console.log(
+        `[INDEX] Processing embedding batch ${index + 1}/${batches.length}`
+      );
+
+      const chunksWithEmbeddings = await Promise.all(
+        batch.map(async (chunk: any) => {
+          const embedding = await generateEmbedding(chunk.content);
+
+          return {
+            ...chunk,
+            embedding,
+          };
+        })
+      );
+
+      await bulkInsertCodeChunks(chunksWithEmbeddings);
+
+      console.log(`[INDEX] Inserted ${chunksWithEmbeddings.length} chunks`);
+    }
+  });
+
+  // Update repository indexing state
+  await step.run("update-repository-state", async () => {
+    await prisma.repository.update({
+      where: {
+        id: repository.id,
+      },
+      data: {
+        lastIndexedCommitSha: commitSha,
+      },
+    });
+
+    console.log(`[INDEX] Updated last indexed commit to ${commitSha}`);
+  });
+
+  return {
+    repositoryId: repository.id,
+    filesProcessed: changedFiles.length,
+    chunksGenerated: processedChunks.length,
+    indexedCommitSha: commitSha,
+  };
 };
 
 export const indexRepository = inngest.createFunction(

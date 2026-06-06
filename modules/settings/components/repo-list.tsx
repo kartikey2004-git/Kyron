@@ -195,8 +195,7 @@ const RepoList: React.FC<RepoListProps> = ({ className }) => {
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
-              {repositories.length} repository
-              {repositories.length !== 1 ? "ies" : ""} connected
+              {repositories.length} {repositories.length === 1 ? "repository" : "repositories"} connected
             </span>
             <span>Webhooks configured for pull request events</span>
           </div>
