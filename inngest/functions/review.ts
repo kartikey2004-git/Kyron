@@ -4,11 +4,11 @@ import { inngest } from "@/inngest/client";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
-import { retrieveContext } from "@/modules/ai/lib/rag";
 import {
   getPullRequestDiff,
   postReviewComment,
 } from "@/modules/github/lib/github";
+import { retrieveContext } from "@/modules/ai/lib/retrieve-context";
 
 export const generateReview = inngest.createFunction(
   {
@@ -42,20 +42,53 @@ export const generateReview = inngest.createFunction(
       }
     );
 
+    const repository = await step.run("find-repository", async () => {
+      const repository = await prisma.repository.findFirst({
+        where: {
+          owner,
+          name: repo,
+        },
+      });
+
+      if (!repository) {
+        throw new Error("Repository not found");
+      }
+
+      return repository;
+    });
+
     const context = await step.run(
       "retrieve-context",
       async () => {
-        const query = `title: ${title}\n${description}`;
+        const query = `
+PR Title:
+${title}
 
-        const result = await retrieveContext(query, `${owner}/${repo}`);
+PR Description:
+${description ?? ""}
 
-        return result;
+Diff:
+${diff}
+`;
+        return retrieveContext(query, repository.id, 15);
       },
       {
         retries: 3,
         retryDelay: 1000,
       }
     );
+
+    const formattedContext =
+      context.length > 0
+        ? context
+            .map(
+              (chunk: any) => `
+            FILE:
+            ${chunk.filePath} 
+            ${chunk.content}`
+            )
+            .join("\n\n")
+        : "No relevant code context found.";
 
     const review = await step.run("generate-ai-review", async () => {
       const model = google("gemini-2.5-flash");
@@ -74,10 +107,9 @@ PR DESCRIPTION
 ======================
 ${description || "No description provided"}
 
-======================
-CONTEXT FROM CODEBASE
-======================
-${context.join("\n\n")}
+RELATED CODE CONTEXT
+=====================
+${formattedContext}
 
 ======================
 CODE CHANGES
