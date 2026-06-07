@@ -51,11 +51,26 @@ export async function getChangedFiles(
   const octokit = new Octokit({ auth: accessToken });
 
   if (!previousSha) {
+    console.log({
+      owner,
+      repo,
+      currentSha,
+      previousSha,
+    });
+
+    const commit = await octokit.rest.git.getCommit({
+      owner,
+      repo,
+      commit_sha: currentSha,
+    });
+
+    console.log("commit tree sha", commit.data.tree.sha);
+
     // First indexing: Get full tree
     const tree = await octokit.rest.git.getTree({
       owner,
       repo,
-      tree_sha: currentSha,
+      tree_sha: commit.data.tree.sha,
       recursive: "true",
     });
 
