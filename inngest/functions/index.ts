@@ -10,6 +10,7 @@ import {
   getCommitAuthor,
   getFileContentFromGithub,
 } from "@/lib/github-repo";
+import { Octokit } from "octokit";
 
 export const indexRepositoryHandler = async ({
   event,
@@ -66,20 +67,57 @@ export const indexRepositoryHandler = async ({
 
   // Get changed files via GitHub API (NO clone, NO git binary)
 
+  const octokit = new Octokit({
+    auth: account.accessToken,
+  });
+
+  let effectiveCommitSha = commitSha;
+
+  // First repository indexing
+
+  if (!effectiveCommitSha) {
+    const repoInfo = await octokit.rest.repos.get({
+      owner,
+      repo,
+    });
+
+    const branch = await octokit.rest.repos.getBranch({
+      owner,
+      repo,
+      branch: repoInfo.data.default_branch,
+    });
+
+    effectiveCommitSha = branch.data.commit.sha;
+
+    console.log(`[INDEX] Using default branch HEAD: ${effectiveCommitSha}`);
+  }
+
+  console.log({
+    owner,
+    repo,
+    effectiveCommitSha,
+    previousSha: repository.lastIndexedCommitSha,
+  });
+
   const changedFiles = await step.run("fetch-and-diff-files", async () => {
     return await getChangedFiles(
       owner,
       repo,
       account.accessToken,
       repository.lastIndexedCommitSha,
-      commitSha
+      effectiveCommitSha
     );
   });
 
   // Get commit author info (replaces git blame metadata)
 
   const commitAuthor = await step.run("get-commit-author", async () => {
-    return await getCommitAuthor(owner, repo, account.accessToken, commitSha);
+    return await getCommitAuthor(
+      owner,
+      repo,
+      account.accessToken,
+      effectiveCommitSha
+    );
   });
 
   // 4. Delete old chunks for changed files (Incremental Invalidation)
@@ -107,7 +145,7 @@ export const indexRepositoryHandler = async ({
           repo,
           account.accessToken,
           filePath,
-          commitSha
+          effectiveCommitSha
         );
 
         if (!content) return null;
@@ -145,7 +183,7 @@ export const indexRepositoryHandler = async ({
           signature: chunk.signature,
           imports: chunk.imports,
           // Using commitSha + author from API instead of per-line git blame
-          lastModifiedCommit: commitSha,
+          lastModifiedCommit: effectiveCommitSha,
           authorName: commitAuthor.name,
           embedding: undefined, // Placeholder, filled in next step
         });
@@ -191,7 +229,7 @@ export const indexRepositoryHandler = async ({
   await step.run("update-repository-state", async () => {
     await prisma.repository.update({
       where: { id: repository.id },
-      data: { lastIndexedCommitSha: commitSha },
+      data: { lastIndexedCommitSha: effectiveCommitSha },
     });
     console.log(`[INDEX] Updated last indexed commit to ${commitSha}`);
   });
@@ -200,7 +238,7 @@ export const indexRepositoryHandler = async ({
     repositoryId: repository.id,
     filesProcessed: changedFiles.length,
     chunksGenerated: processedChunks.length,
-    indexedCommitSha: commitSha,
+    indexedCommitSha: effectiveCommitSha,
   };
 };
 

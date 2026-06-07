@@ -50,23 +50,17 @@ export async function getChangedFiles(
 ) {
   const octokit = new Octokit({ auth: accessToken });
 
-  if (!previousSha) {
-    console.log({
-      owner,
-      repo,
-      currentSha,
-      previousSha,
-    });
+  if (!currentSha) {
+    throw new Error(`Missing currentSha for ${owner}/${repo}`);
+  }
 
+  if (!previousSha) {
     const commit = await octokit.rest.git.getCommit({
       owner,
       repo,
       commit_sha: currentSha,
     });
 
-    console.log("commit tree sha", commit.data.tree.sha);
-
-    // First indexing: Get full tree
     const tree = await octokit.rest.git.getTree({
       owner,
       repo,
@@ -76,8 +70,12 @@ export async function getChangedFiles(
 
     return tree.data.tree
       .filter(
-        (item): item is typeof item & { path: string; type: "blob" } =>
-          item.type === "blob" && item.path !== null
+        (
+          item
+        ): item is typeof item & {
+          path: string;
+          type: "blob";
+        } => item.type === "blob" && item.path !== null
       )
       .map((item) => item.path)
       .filter(isValidCodeFile);
