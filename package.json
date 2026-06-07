@@ -90,6 +90,9 @@
     "tsx": "^4.21.0",
     "typescript": "^5"
   },
+  "overrides": {
+    "kysely": "0.28.8"
+  },
   "ignoreScripts": [
     "sharp",
     "unrs-resolver"
