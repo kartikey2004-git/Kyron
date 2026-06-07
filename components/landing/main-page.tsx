@@ -70,10 +70,7 @@ export function MainPage() {
       <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b border-border bg-background">
         <div className="flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-6 w-6 items-center justify-center border border-border bg-background">
-              <span className="text-[10px] font-medium leading-none">AI</span>
-            </div>
-            <span className="text-sm font-medium">AI Code Review</span>
+            <span className="text-sm font-medium">Kryon</span>
           </div>
 
           {mounted && (
@@ -99,7 +96,7 @@ export function MainPage() {
             <div className="space-y-8">
               <div className="inline-flex items-center rounded-full border border-border bg-muted/50 px-4 py-2">
                 <span className="text-sm font-medium tracking-wide">
-                  AI-Powered Code Review
+                  Kryon | AI-Powered Code Review
                 </span>
               </div>
 
@@ -119,20 +116,39 @@ export function MainPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-4 justify-center items-center sm:flex-row sm:gap-6">
-              <Button
-                onClick={handleStartReviewing}
-                size="lg"
-                className="h-14 px-8 text-base font-medium transition-all hover:scale-105"
-              >
-                Start reviewing
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                <Button
+                  onClick={handleStartReviewing}
+                  size="lg"
+                  className="h-14 px-8 text-base font-medium transition-all hover:scale-105"
+                >
+                  Start reviewing
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-14 px-8 text-base font-medium"
+                  onClick={() =>
+                    window.open("https://kyrondevdocs.vercel.app/", "_blank")
+                  }
+                >
+                  Documentation
+                </Button>
+              </div>
 
               <Button
-                variant="outline"
+                variant="ghost"
                 size="lg"
                 className="h-14 px-8 text-base font-medium"
+                onClick={() =>
+                  window.open(
+                    "https://github.com/kartikey2004-git/AI-Code-Review",
+                    "_blank"
+                  )
+                }
               >
                 Built by Kartikey
               </Button>
@@ -480,92 +496,76 @@ export function MainPage() {
                 Start reviewing for free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-14 px-8 text-base font-medium"
+                onClick={() =>
+                  window.open("https://kyrondevdocs.vercel.app/", "_blank")
+                }
+              >
+                Read documentation
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-border bg-background">
-        <div className="max-w-7xl mx-auto px-8 py-16">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-12">
-            <div className="col-span-2 md:col-span-1">
-              <h3 className="font-semibold text-xl mb-6">AI Code Review</h3>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                Review pull requests in seconds with AI. Ship better code,
-                faster.
-              </p>
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center gap-3">
+              <span className="font-semibold">Kryon | AI Code Review</span>
             </div>
 
-            <div>
-              <h4 className="font-medium text-base mb-6">Product</h4>
-              <ul className="space-y-3">
-                {footerLinks.product.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <p className="mt-4 max-w-md text-sm text-muted-foreground">
+              AI-powered pull request reviews that help developers catch bugs,
+              improve code quality, and ship faster.
+            </p>
+
+            <div className="mt-8 flex items-center gap-6">
+              <a
+                href="https://github.com/kartikey2004-git/AI-Code-Review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                GitHub
+              </a>
+
+              <a
+                href="https://x.com/kartikeybuilds"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                X / Twitter
+              </a>
+
+              <a
+                href="https://linkedin.com/in/kartikey-bhatnagar-2702a4337"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                LinkedIn
+              </a>
+
+              <a
+                href="https://kyrondevdocs.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Docs
+              </a>
             </div>
 
-            <div>
-              <h4 className="font-medium text-base mb-6">Company</h4>
-              <ul className="space-y-3">
-                {footerLinks.company.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <div className="mt-8 h-px w-full max-w-md bg-border" />
 
-            <div>
-              <h4 className="font-medium text-base mb-6">Legal</h4>
-              <ul className="space-y-3">
-                {footerLinks.legal.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-muted-foreground text-base hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-16 pt-8 border-t border-border">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <p className="text-muted-foreground text-base">
-                © 2026 AI Code Review. All rights reserved.
-              </p>
-
-              <div className="flex items-center gap-6">
-                {socialLinks.map((social, index) => {
-                  const Icon = social.icon;
-                  return (
-                    <a
-                      key={index}
-                      href={social.href}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={social.name}
-                    >
-                      <Icon className="h-6 w-6" />
-                    </a>
-                  );
-                })}
-              </div>
+            <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted-foreground">
+              <p>Built by Kartikey</p>
+              <p>© 2026 AI Code Review</p>
             </div>
           </div>
         </div>
