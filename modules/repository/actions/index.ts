@@ -62,24 +62,49 @@ export const connectRepository = async (
     throw new Error("User not authenticated");
   }
 
-  // TODO : RATE LIMIT THE USER OR CHECK IF USER CAN CONNECT MORE REPOS
+  // Check repository limit
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { subscription: true }
+  });
+
+  if (!user) throw new Error("User not found");
+
+  const plan = user.subscription?.plan || "free";
+  const MAX_REPOS: Record<string, number> = {
+    free: 3,
+    pro: 10,
+    enterprise: 9999,
+  };
+
+  if (user.repositoryCount >= (MAX_REPOS[plan] || 0)) {
+    throw new Error("Repository limit reached. Upgrade your plan to connect more repositories.");
+  }
 
   const webhook = await createWebhook(owner, repo);
 
   if (webhook) {
-    await prisma.repository.create({
-      data: {
-        githubId: BigInt(githubId),
-        name: repo,
-        owner: owner,
-        fullName: `${owner}/${repo}`,
-        url: `https://github.com/${owner}/${repo}`,
-        userId: session.user.id,
-      },
-    });
+    await prisma.$transaction([
+      prisma.repository.create({
+        data: {
+          githubId: BigInt(githubId),
+          name: repo,
+          owner: owner,
+          fullName: `${owner}/${repo}`,
+          url: `https://github.com/${owner}/${repo}`,
+          userId: session.user.id,
+        },
+      }),
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          repositoryCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
   }
-
-  // TODO: INCREMENT THE USER'S REPOSITORY COUNT FOR USAGE TRACKING
 
   // TRIGGER REPOSITORY INDEXING USING RAG(FIRE AND FORGOT)
 

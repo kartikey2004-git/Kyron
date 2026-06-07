@@ -18,8 +18,21 @@ model User {
   accounts      Account[]
   repositories  Repository[]
   sessions      Session[]
+  repositoryCount Int        @default(0)
+  subscription  Subscription?
 
   @@map("user")
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  plan      String   @default("free") // "free", "pro", "enterprise"
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscription")
 }
 
 model Session {
