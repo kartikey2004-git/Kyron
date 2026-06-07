@@ -163,12 +163,22 @@ export async function disconnectRepository(repositoryId: string) {
     await deleteWebhook(repository.owner, repository.name);
 
     // Delete the repository from the database
-    const disconnectedRepository = await prisma.repository.delete({
-      where: {
-        id: repositoryId,
-        userId: session.user.id,
-      },
-    });
+    const [disconnectedRepository] = await prisma.$transaction([
+      prisma.repository.delete({
+        where: {
+          id: repositoryId,
+          userId: session.user.id,
+        },
+      }),
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          repositoryCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
 
     // Revalidate the repository page to show the updated repositories
 
@@ -211,11 +221,19 @@ export async function disconnectAllRepositories() {
     );
 
     // Delete all repositories from the database
-    const result = await prisma.repository.deleteMany({
-      where: {
-        userId: session.user.id,
-      },
-    });
+    const result = await prisma.$transaction([
+      prisma.repository.deleteMany({
+        where: {
+          userId: session.user.id,
+        },
+      }),
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+          repositoryCount: 0,
+        },
+      }),
+    ]);
 
     // Revalidate the repository page to show the updated repositories
 
@@ -223,7 +241,7 @@ export async function disconnectAllRepositories() {
 
     revalidatePath("/dashboard/settings", "page");
 
-    return { success: true, count: result.count };
+    return { success: true, count: result[0].count };
   } catch (error) {
     console.error("Error disconnecting all repositories:", error);
     return { success: false, error: "Failed to disconnect repositories" };

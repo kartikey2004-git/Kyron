@@ -3,6 +3,11 @@
 
 import { auth } from "@/lib/auth";
 import {
+  getTotalConnectedRepositories,
+  getTotalReviews,
+  getReviewsTrend,
+} from "@/modules/dashboard/lib/db-metrics";
+import {
   fetchUserContributions,
   getGithubAccessToken,
 } from "@/modules/github/lib/github";
@@ -30,9 +35,8 @@ export const getDashboardStats = async () => {
 
     const { data: user } = await octokit.rest.users.getAuthenticated();
 
-    // TODO : FETCH TOTAL CONNECTED REPO FROM DB
-
-    const totalRepos = 30;
+    // Fetch total connected repo from DB
+    const totalRepos = await getTotalConnectedRepositories(session.user.id);
 
     // fetch the contribution stats for authenticated user : commits and pull requests
 
@@ -49,9 +53,8 @@ export const getDashboardStats = async () => {
 
     const totalPrs = prs.total_count;
 
-    // TODO : COUNT AI REVIEWS FROM DATABASE
-
-    const totalReviews = 44;
+    // Count AI reviews from database
+    const totalReviews = await getTotalReviews(session.user.id);
 
     return {
       totalCommits,
@@ -158,34 +161,13 @@ export const getMonthlyActivity = async () => {
       }
     });
 
-    // TODO: Fetch real reviews from database for the last 6 months
-    // For now, generate sample reviews distributed across the last 6 months
-    const generateSampleReviews = () => {
-      const sampleReviews = [];
-      const now = new Date();
-
-      // Generate random reviews over the past 6 months
-      for (let i = 0; i < 25; i++) {
-        const randomDaysAgo = Math.floor(Math.random() * 180); // Random day in the last 6 months
-        const reviewDate = new Date(now);
-        reviewDate.setDate(reviewDate.getDate() - randomDaysAgo);
-
-        sampleReviews.push({
-          createdAt: reviewDate,
-        });
-      }
-
-      return sampleReviews;
-    };
-
-    const reviews = generateSampleReviews();
+    // Fetch real reviews from database for the last 6 months
+    const reviewsTrend = await getReviewsTrend(session.user.id);
 
     // Distribute reviews by month
-    reviews.forEach((review) => {
-      const monthKey = monthNames[review.createdAt.getMonth()];
-
-      if (monthlyData[monthKey]) {
-        monthlyData[monthKey].reviews += 1;
+    reviewsTrend.forEach((trend) => {
+      if (monthlyData[trend.month]) {
+        monthlyData[trend.month].reviews = trend.reviews;
       }
     });
 
