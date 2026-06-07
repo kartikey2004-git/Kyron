@@ -2,6 +2,7 @@
   "name": "ai-code-review",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.2.21",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
