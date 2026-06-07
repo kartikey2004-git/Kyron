@@ -43,7 +43,6 @@
     "highlight.js": "^11.11.1",
     "inngest": "^4.1.0",
     "input-otp": "^1.4.2",
-    "kysely": "0.28.8",
     "lucide-react": "^1.8.0",
     "media-chrome": "^4.19.0",
     "motion": "^12.38.0",
