@@ -2,14 +2,14 @@
 
 import { inngest } from "@/inngest/client";
 import prisma from "@/lib/db";
-import path from "path";
-import os from "os";
-import { getFileContent, getRepoDiff } from "@/lib/git-utils";
-import { filterAndValidateFiles } from "@/lib/file-filter";
 import { chunkFileAST, CodeChunkDbInput } from "@/lib/ast-chunker";
-import { getGitBlameForLines } from "@/lib/git-blame";
 import { chunkArray, generateEmbedding } from "@/lib/embedding";
 import { bulkInsertCodeChunks } from "@/lib/db-insert";
+import {
+  getChangedFiles,
+  getCommitAuthor,
+  getFileContentFromGithub,
+} from "@/lib/github-repo";
 
 export const indexRepositoryHandler = async ({
   event,
@@ -64,24 +64,22 @@ export const indexRepositoryHandler = async ({
 
   // In a persistent worker architecture, a mounted volume would retain the repository state, enabling efficient incremental Git diff computation across executions.
 
-  const repoDir = path.join(os.tmpdir(), `repo-${repository.id}`);
+  // Get changed files via GitHub API (NO clone, NO git binary)
 
   const changedFiles = await step.run("fetch-and-diff-files", async () => {
-    const allChangedPaths = await getRepoDiff(
-      repoDir,
+    return await getChangedFiles(
       owner,
       repo,
       account.accessToken,
-      repository.lastIndexedCommitSha
+      repository.lastIndexedCommitSha,
+      commitSha
     );
+  });
 
-    // Apply strict filtering
-    const filteredFiles = await filterAndValidateFiles(
-      repoDir,
-      allChangedPaths
-    );
+  // Get commit author info (replaces git blame metadata)
 
-    return filteredFiles;
+  const commitAuthor = await step.run("get-commit-author", async () => {
+    return await getCommitAuthor(owner, repo, account.accessToken, commitSha);
   });
 
   // 4. Delete old chunks for changed files (Incremental Invalidation)
@@ -99,57 +97,57 @@ export const indexRepositoryHandler = async ({
     });
   }
 
+  // Read file contents via GitHub API
+
   const filesToProcess = await step.run("read-file-contents", async () => {
     const files = await Promise.all(
-      changedFiles.map(async (filePath: any) => {
-        const content = await getFileContent(repoDir, filePath);
+      changedFiles.map(async (filePath: string) => {
+        const content = await getFileContentFromGithub(
+          owner,
+          repo,
+          account.accessToken,
+          filePath,
+          commitSha
+        );
+
+        if (!content) return null;
 
         console.log(
           "[INDEX] Read file:",
           filePath,
           `(${content.length} chars)`
         );
-
-        return {
-          filePath,
-          content,
-        };
+        return { filePath, content };
       })
     );
 
-    return files;
+    return files.filter(
+      (f): f is { filePath: string; content: string } => f !== null
+    );
   });
 
-  const processedChunks = await step.run("ast-parse-and-blame", async () => {
+  // AST Parse + Chunk (NO git blame, using commitSha + author from API)
+
+  const processedChunks = await step.run("ast-parse-and-chunk", async () => {
     const allChunks: CodeChunkDbInput[] = [];
 
     for (const { filePath, content } of filesToProcess) {
-      // Chunk the file using Tree-sitter
       const chunks = await chunkFileAST(filePath, content);
 
       for (const chunk of chunks) {
-        // Pre-compute Git Blame for this specific chunk's line range
-        const blame = await getGitBlameForLines(
-          repoDir,
-          filePath,
-          chunk.startLine,
-          chunk.endLine
-        );
-
         allChunks.push({
           repoId: repository.id,
           filePath: chunk.filePath,
           startLine: chunk.startLine,
           endLine: chunk.endLine,
-          language: path.extname(filePath).slice(1).toLowerCase(), // 'ts', 'py', etc.
+          language: chunk.filePath.split(".").pop()?.toLowerCase() || "unknown",
           content: chunk.content,
           signature: chunk.signature,
           imports: chunk.imports,
-          lastModifiedCommit: blame?.commitHash || null,
-          authorName: blame?.authorName || null,
-          // NOTE: We are NOT inserting the embedding yet.
-          // That happens in Step 4. We pass a placeholder or null for now.
-          embedding: undefined,
+          // Using commitSha + author from API instead of per-line git blame
+          lastModifiedCommit: commitSha,
+          authorName: commitAuthor.name,
+          embedding: undefined, // Placeholder, filled in next step
         });
       }
     }
@@ -168,7 +166,6 @@ export const indexRepositoryHandler = async ({
     }
 
     const batches = chunkArray(processedChunks, EMBEDDING_BATCH_SIZE);
-
     console.log(
       `[INDEX] Generating embeddings for ${processedChunks.length} chunks in ${batches.length} batches`
     );
@@ -181,16 +178,11 @@ export const indexRepositoryHandler = async ({
       const chunksWithEmbeddings = await Promise.all(
         batch.map(async (chunk: any) => {
           const embedding = await generateEmbedding(chunk.content);
-
-          return {
-            ...chunk,
-            embedding,
-          };
+          return { ...chunk, embedding };
         })
       );
 
       await bulkInsertCodeChunks(chunksWithEmbeddings);
-
       console.log(`[INDEX] Inserted ${chunksWithEmbeddings.length} chunks`);
     }
   });
@@ -198,14 +190,9 @@ export const indexRepositoryHandler = async ({
   // Update repository indexing state
   await step.run("update-repository-state", async () => {
     await prisma.repository.update({
-      where: {
-        id: repository.id,
-      },
-      data: {
-        lastIndexedCommitSha: commitSha,
-      },
+      where: { id: repository.id },
+      data: { lastIndexedCommitSha: commitSha },
     });
-
     console.log(`[INDEX] Updated last indexed commit to ${commitSha}`);
   });
 
