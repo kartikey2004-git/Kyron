@@ -53,7 +53,7 @@ export default function LoginForm() {
       <div className="hidden md:flex flex-col justify-between p-12 border-r border-border">
         <div className="space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">
-            AI Code Review
+            Kryon | AI Code Review
           </h1>
           <p className="text-sm text-muted-foreground">
             Review pull requests in seconds with AI
