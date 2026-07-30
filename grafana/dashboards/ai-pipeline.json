@@ -1,0 +1,125 @@
+{
+  "title": "AI Pipeline (indexing + review generation)",
+  "uid": "ai-pipeline",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "tags": ["ai-code-review"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Review generation duration (p95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(review_generation_duration_seconds_bucket[15m])) by (le))",
+          "legendFormat": "p95 generateReview"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Repository index duration (p95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(repository_index_duration_seconds_bucket[15m])) by (le))",
+          "legendFormat": "p95 indexRepository"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Gemini embedding call duration (p95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(embedding_generation_duration_seconds_bucket[15m])) by (le))",
+          "legendFormat": "p95 embedContent"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Embedding batch size (p50 / p95)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.50, sum(rate(embedding_batch_size_bucket[15m])) by (le))",
+          "legendFormat": "p50 batch size"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(embedding_batch_size_bucket[15m])) by (le))",
+          "legendFormat": "p95 batch size"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "GitHub API call duration (p95) by endpoint",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(github_api_call_duration_seconds_bucket[15m])) by (le, endpoint))",
+          "legendFormat": "{{endpoint}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "GitHub API errors by endpoint",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(github_api_errors_total[15m])) by (endpoint, status_code)",
+          "legendFormat": "{{endpoint}} ({{status_code}})"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Step-level detail",
+      "type": "text",
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 4 },
+      "options": {
+        "mode": "markdown",
+        "content": "Individual Inngest **step** durations (e.g. `fetch-and-diff-files`, `retrieve-context`, `generate-ai-review`) aren't Prometheus metrics — they only exist as spans in **Tempo**. Search the Tempo datasource for `service.name=\"ai-code-review\"` and look at spans named after the step id, or open a trace from a slow request via Loki's traceId."
+      }
+    }
+  ]
+}

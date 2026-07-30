@@ -11,6 +11,223 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ai-code-review"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Phase 6: cache-aside layer for GitHub API responses, embeddings, and
+  # dashboard reads (see lib/cache.ts, docs/caching-strategy.md).
+  redis:
+    image: redis:7-alpine
+    container_name: ai-code-review-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Phase 1: containerized app + Inngest Dev Server, wired to the postgres
+  # service above.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_BASE_URL: ${NEXT_PUBLIC_APP_BASE_URL:-http://localhost:3000}
+    # Naming this lets Phase 10 CI set APP_IMAGE to the GHCR :candidate tag
+    # it just pushed, `docker pull` it, then `docker compose up -d` (no
+    # --build) reuses that exact image instead of rebuilding from source —
+    # the smoke test then verifies the actual image that would be promoted.
+    image: ${APP_IMAGE:-ai-code-review-app:local}
+    container_name: ai-code-review-app
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    environment:
+      # Structural service-to-service wiring — not secrets, so not in
+      # .env.docker. sslmode=disable because the local postgres container
+      # doesn't have SSL configured (see lib/db.ts, which only forces
+      # sslmode=require when the URL doesn't already specify one).
+      DATABASE_URL: postgresql://admin:secret123@postgres:5432/ai-code-review?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      INNGEST_DEV: "1"
+      INNGEST_BASE_URL: http://inngest:8288
+      NODE_ENV: production
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  inngest:
+    image: inngest/inngest:latest
+    container_name: ai-code-review-inngest
+    restart: unless-stopped
+    command: ["inngest", "dev", "-u", "http://app:3000/api/inngest"]
+    ports:
+      - "8288:8288"
+
+  # Phase 4: scrapes the app's /api/metrics every 15s (see prometheus.yml).
+  # --web.enable-remote-write-receiver (Phase 7) lets k6 push results here
+  # directly via -o experimental-prometheus-rw — that's a push to an HTTP
+  # endpoint on this same server, not a scrape_config job, so there's no
+  # separate "k6 scrape job" anywhere in prometheus.yml.
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ai-code-review-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-remote-write-receiver"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+
+  # Phase 3: receives OTLP traces from the app (instrumentation.ts) and
+  # forwards them to Tempo.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: ai-code-review-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
+
+  tempo:
+    # Pinned: :latest currently resolves to Tempo v3's distributed
+    # "live-store" architecture, whose OTLP receiver binds to 127.0.0.1
+    # under a minimal single-binary config — unreachable from other
+    # containers. 2.6.1 is the last monolithic-mode release matching the
+    # config below.
+    image: grafana/tempo:2.6.1
+    container_name: ai-code-review-tempo
+    restart: unless-stopped
+    # The tempo image's default user can't write to a freshly-created named
+    # volume (root-owned by default) — root avoids that for this local-only
+    # demo stack. Not something to carry into a real deployment.
+    user: root
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"
+
+  # Phase 5: log storage. Promtail (below) ships app container logs here;
+  # Grafana queries it and, via the Tempo datasource's trace-to-logs
+  # linking, jumps straight from a slow span to its exact log lines.
+  loki:
+    # Pinned for the same reason as tempo below — a stable, well-documented
+    # single-binary config, not whatever :latest currently resolves to.
+    image: grafana/loki:2.9.6
+    container_name: ai-code-review-loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  # Tails every container's stdout via the Docker socket, parses our pino
+  # JSON lines, and ships them to Loki (see promtail-config.yml).
+  promtail:
+    image: grafana/promtail:2.9.6
+    container_name: ai-code-review-promtail
+    restart: unless-stopped
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - loki
+
+  # Phase 5: dashboards-as-code. Datasources (Prometheus/Loki/Tempo) and
+  # dashboards (grafana/dashboards/*.json) are auto-provisioned on start —
+  # see grafana/provisioning/. Anonymous admin access is enabled: this is a
+  # local-only demo stack with no real users (see plan.md non-goals), not
+  # something to carry into a real deployment.
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: ai-code-review-grafana
+    restart: unless-stopped
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      # Two separate top-level mounts, not nested — you can't bind-mount a
+      # path inside another already-read-only bind mount (Docker can't
+      # create the mountpoint dir there).
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards-json:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
+  # Phase 7: k6 load tests. NOT started by plain `docker compose up` — the
+  # profile gate means you need `docker compose --profile load-test run
+  # --rm k6 run /scripts/<name>.js` (see load-tests/README.md).
+  k6:
+    image: grafana/k6:latest
+    container_name: ai-code-review-k6
+    profiles: ["load-test"]
+    environment:
+      BASE_URL: http://app:3000
+      K6_PROMETHEUS_RW_SERVER_URL: http://prometheus:9090/api/v1/write
+      # Default is p(99) only — grafana/dashboards/k6-load-test.json also
+      # wants p95, min/max/avg for a genuinely useful latency panel.
+      K6_PROMETHEUS_RW_TREND_STATS: "p(95),p(99),min,max,avg"
+    volumes:
+      - ./load-tests:/scripts:ro
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
+  redis_data:
+  prometheus_data:
+  tempo_data:
+  loki_data:
+  grafana_data:

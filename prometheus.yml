@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "ai-code-review-app"
+    metrics_path: /api/metrics
+    static_configs:
+      - targets: ["app:3000"]
+
+  # Phase 7 (k6 load tests) adds a remote_write receiver job here once
+  # k6's Prometheus output is wired up — see plan.md.

@@ -1,5 +1,19 @@
 import { Octokit } from "octokit";
 
+// No outbound GitHub call anywhere in this file (or modules/github/lib/github.ts,
+// or the inline Octokit calls in inngest/functions/index.ts) had a
+// timeout before this — a slow/hung GitHub API response would hang
+// indexRepository indefinitely (bounded only by Inngest's own, much
+// longer, function-level timeout). A fresh AbortSignal per call, not one
+// shared across a function's multiple calls — AbortSignal.timeout()
+// starts counting the moment it's created, so reusing one across several
+// sequential requests would incorrectly count their combined duration
+// against a single budget.
+const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
+function withTimeout() {
+  return { signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS) };
+}
+
 const VALID_EXTENSIONS = [
   ".ts",
   ".tsx",
@@ -59,6 +73,7 @@ export async function getChangedFiles(
       owner,
       repo,
       commit_sha: currentSha,
+      request: withTimeout(),
     });
 
     const tree = await octokit.rest.git.getTree({
@@ -66,6 +81,7 @@ export async function getChangedFiles(
       repo,
       tree_sha: commit.data.tree.sha,
       recursive: "true",
+      request: withTimeout(),
     });
 
     return tree.data.tree
@@ -87,6 +103,7 @@ export async function getChangedFiles(
     repo,
     base: previousSha,
     head: currentSha,
+    request: withTimeout(),
   });
 
   return (
@@ -111,6 +128,7 @@ export async function getFileContentFromGithub(
       repo,
       path: filePath,
       ref,
+      request: withTimeout(),
     });
 
     if (!("content" in file.data)) return null;
@@ -134,6 +152,7 @@ export async function getCommitAuthor(
       owner,
       repo,
       ref: commitSha,
+      request: withTimeout(),
     });
     return {
       name: commit.data.commit.author?.name ?? null,

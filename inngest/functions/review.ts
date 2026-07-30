@@ -4,11 +4,18 @@ import { inngest } from "@/inngest/client";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
+import { getLogger } from "@/lib/logger";
+import { withRequestContext } from "@/lib/request-context";
+import { invalidatePattern } from "@/lib/cache";
+import { reviewGenerationDuration } from "@/lib/metrics";
+import { withSpan } from "@/lib/tracing";
 import {
   getPullRequestDiff,
   postReviewComment,
 } from "@/modules/github/lib/github";
 import { retrieveContext } from "@/modules/ai/lib/retrieve-context";
+
+const REVIEW_MODEL = "gemini-2.5-flash";
 
 export const generateReview = inngest.createFunction(
   {
@@ -18,49 +25,75 @@ export const generateReview = inngest.createFunction(
   },
 
   async ({ event, step }: { event: any; step: any }) => {
-    const { owner, repo, prNumber, userId } = event.data;
+    return withRequestContext(
+      () => runGenerateReview({ event, step }),
+      { requestId: event.id }
+    );
+  }
+);
 
-    const { diff, title, description, token } = await step.run(
-      "fetch-pr-data",
-      async () => {
-        const account = await prisma.account.findFirst({
-          where: { userId: userId, providerId: "github" },
-        });
+async function runGenerateReview({
+  event,
+  step,
+}: {
+  event: any;
+  step: any;
+}) {
+  const { owner, repo, prNumber, userId } = event.data;
+  const logger = getLogger({ fn: "generateReview", owner, repo, prNumber });
+  const stopTimer = reviewGenerationDuration.startTimer();
 
-        if (!account?.accessToken) {
-          throw new Error("GitHub access token not found");
-        }
+  return withSpan(
+    "inngest.generateReview",
+    async () => {
+      try {
+        logger.info("starting review generation");
 
-        const data = await getPullRequestDiff(
-          account.accessToken,
-          owner,
-          repo,
-          prNumber
+        const { diff, title, description, token } = await step.run(
+          "fetch-pr-data",
+          () =>
+            withSpan("fetch-pr-data", async () => {
+              const account = await prisma.account.findFirst({
+                where: { userId: userId, providerId: "github" },
+              });
+
+              if (!account?.accessToken) {
+                throw new Error("GitHub access token not found");
+              }
+
+              const data = await getPullRequestDiff(
+                account.accessToken,
+                owner,
+                repo,
+                prNumber
+              );
+
+              return { ...data, token: account.accessToken };
+            })
         );
 
-        return { ...data, token: account.accessToken };
-      }
-    );
+        const repository = await step.run("find-repository", () =>
+          withSpan("find-repository", async () => {
+            const repository = await prisma.repository.findFirst({
+              where: {
+                owner,
+                name: repo,
+              },
+            });
 
-    const repository = await step.run("find-repository", async () => {
-      const repository = await prisma.repository.findFirst({
-        where: {
-          owner,
-          name: repo,
-        },
-      });
+            if (!repository) {
+              throw new Error("Repository not found");
+            }
 
-      if (!repository) {
-        throw new Error("Repository not found");
-      }
+            return repository;
+          })
+        );
 
-      return repository;
-    });
-
-    const context = await step.run(
-      "retrieve-context",
-      async () => {
-        const query = `
+        const context = await step.run(
+          "retrieve-context",
+          () =>
+            withSpan("retrieve-context", async () => {
+              const query = `
 PR Title:
 ${title}
 
@@ -70,30 +103,38 @@ ${description ?? ""}
 Diff:
 ${diff}
 `;
-        return retrieveContext(query, repository.id, 15);
-      },
-      {
-        retries: 3,
-        retryDelay: 1000,
-      }
-    );
+              return retrieveContext(query, repository.id, 15);
+            }),
+          {
+            retries: 3,
+            retryDelay: 1000,
+          }
+        );
 
-    const formattedContext =
-      context.length > 0
-        ? context
-            .map(
-              (chunk: any) => `
+        logger.info(
+          { contextChunks: context.length },
+          "retrieved review context"
+        );
+
+        const formattedContext =
+          context.length > 0
+            ? context
+                .map(
+                  (chunk: any) => `
             FILE:
-            ${chunk.filePath} 
+            ${chunk.filePath}
             ${chunk.content}`
-            )
-            .join("\n\n")
-        : "No relevant code context found.";
+                )
+                .join("\n\n")
+            : "No relevant code context found.";
 
-    const review = await step.run("generate-ai-review", async () => {
-      const model = google("gemini-2.5-flash");
+        const review = await step.run("generate-ai-review", () =>
+          withSpan(
+            "generate-ai-review",
+            async () => {
+              const model = google(REVIEW_MODEL);
 
-      const prompt = `
+              const prompt = `
 You are an expert code reviewer.
 
 Analyze the following pull request and provide a structured, high-quality review.
@@ -161,44 +202,69 @@ RESPONSE FORMAT:
 - Focus on practical improvements
 `;
 
-      const review = await generateText({
-        model,
-        prompt,
-      });
+              const review = await withSpan(
+                "gemini.generateText",
+                () => generateText({ model, prompt }),
+                { "gemini.model": REVIEW_MODEL }
+              );
 
-      return review.text;
-    });
+              return review.text;
+            }
+          )
+        );
 
-    await step.run("post-comment", async () => {
-      await postReviewComment(token, owner, repo, prNumber, review);
-    });
+        await step.run("post-comment", () =>
+          withSpan("post-comment", () =>
+            postReviewComment(token, owner, repo, prNumber, review)
+          )
+        );
 
-    await step.run("save-review", async () => {
-      const repository = await prisma.repository.findFirst({
-        where: {
-          owner,
-          name: repo,
-        },
-      });
+        await step.run("save-review", () =>
+          withSpan("save-review", async () => {
+            const repository = await prisma.repository.findFirst({
+              where: {
+                owner,
+                name: repo,
+              },
+            });
 
-      if (!repository) {
-        throw new Error("Repository not found");
+            if (!repository) {
+              throw new Error("Repository not found");
+            }
+
+            if (repository) {
+              await prisma.review.create({
+                data: {
+                  repositoryId: repository.id,
+                  prNumber,
+                  prTitle: title,
+                  prUrl: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
+                  review,
+                  status: "completed",
+                },
+              });
+
+              // The dashboard's review count/list just changed under it —
+              // this is the only write path for reviews (there's no
+              // review-creating server action), so this is where it must
+              // be invalidated.
+              await invalidatePattern(`dash:${userId}:*`);
+            }
+          })
+        );
+
+        logger.info("review generation completed");
+        return { success: true };
+      } catch (error) {
+        logger.error(
+          { err: error instanceof Error ? error.message : String(error) },
+          "review generation failed"
+        );
+        throw error;
+      } finally {
+        stopTimer();
       }
-
-      if (repository) {
-        await prisma.review.create({
-          data: {
-            repositoryId: repository.id,
-            prNumber,
-            prTitle: title,
-            prUrl: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
-            review,
-            status: "completed",
-          },
-        });
-      }
-    });
-
-    return { success: true };
-  }
-);
+    },
+    { "github.owner": owner, "github.repo": repo, "github.pr_number": prNumber }
+  );
+}

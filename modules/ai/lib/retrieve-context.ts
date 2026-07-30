@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { generateEmbedding } from "@/lib/embedding";
+import { getLogger } from "@/lib/logger";
 
 interface RetrievedChunk {
   content: string;
@@ -12,9 +13,13 @@ export const retrieveContext = async (
   repositoryId: string,
   limit = 15
 ): Promise<RetrievedChunk[]> => {
+  const logger = getLogger({ repositoryId });
+
   const embedding = await generateEmbedding(query);
 
   const vector = `[${embedding.join(",")}]`;
+
+  const queryStartedAt = Date.now();
 
   const results = await prisma.$queryRaw<
     {
@@ -32,6 +37,11 @@ export const retrieveContext = async (
     ORDER BY embedding <=> ${vector}::vector
     LIMIT ${limit}
   `;
+
+  logger.info(
+    { durationMs: Date.now() - queryStartedAt, resultCount: results.length },
+    "pgvector similarity query completed"
+  );
 
   return results;
 };

@@ -1,0 +1,36 @@
+name: Manual rollback
+
+# Phase 10 of plan.md: the primary rollback mechanism is automatic-on-failure
+# (ci-cd.yml's promote-or-rollback job simply never moves :stable). This
+# workflow is the *manual* path — e.g. :stable was promoted but a problem
+# only showed up after the fact. It retags the previous known-good image
+# back onto :stable. Trigger from the Actions tab ("Run workflow").
+
+on:
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  rollback:
+    name: Retag :stable-previous -> :stable
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retag
+        run: |
+          IMAGE=$(echo "${{ env.REGISTRY }}/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker buildx imagetools create --tag "$IMAGE:stable" "$IMAGE:stable-previous"
+          echo "### Rolled back :white_check_mark:" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$IMAGE:stable\` now points at what was previously \`:stable-previous\`." >> "$GITHUB_STEP_SUMMARY"

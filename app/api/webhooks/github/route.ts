@@ -1,51 +1,80 @@
 import { reviewPullRequest } from "@/modules/ai/actions";
 import { NextRequest, NextResponse } from "next/server";
+import { getLogger } from "@/lib/logger";
+import { withRequestContext } from "@/lib/request-context";
+import { httpRequestDuration } from "@/lib/metrics";
+
+const ROUTE = "webhooks.github";
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+  return withRequestContext(async () => {
+    const logger = getLogger({ route: ROUTE });
+    const stopTimer = httpRequestDuration.startTimer({
+      route: ROUTE,
+      method: "POST",
+    });
 
-    const event = request.headers.get("x-github-event");
+    let statusCode = 200;
 
-    if (event === "ping") {
-      console.log("Ping webhook received");
-      return NextResponse.json(
-        { message: "Webhook received" },
-        { status: 200 },
-      );
-    }
+    try {
+      const body = await request.json();
 
-    // HANDLE PULL REQUEST EVENTS
+      const event = request.headers.get("x-github-event");
 
-    if (event === "pull_request") {
-      const action = body.action;
-      const repo = body.repository?.full_name;
-      const prNumber = body.number;
-
-      const [owner, repoName] = repo.split("/");
-
-      if (
-        action === "opened" ||
-        action === "synchronize" ||
-        action === "reopened"
-      ) {
-        reviewPullRequest(owner, repoName, prNumber)
-          .then(() =>
-            console.log(
-              `Review request sent successfully for: ${repo} #${prNumber}`,
-            ),
-          )
-          .catch((error) =>
-            console.log(`Review failed for ${repo} #${prNumber}:`, error),
-          );
-      } else {
-        console.log("Skipping PR action:", { action });
+      if (event === "ping") {
+        logger.info("ping webhook received");
+        return NextResponse.json(
+          { message: "Webhook received" },
+          { status: 200 },
+        );
       }
-    }
 
-    return NextResponse.json({ message: "Event processed" }, { status: 200 });
-  } catch (error) {
-    console.error("Webhook error:", error);
-    return NextResponse.json({ message: "Webhook failed" }, { status: 500 });
-  }
+      // HANDLE PULL REQUEST EVENTS
+
+      if (event === "pull_request") {
+        const action = body.action;
+        const repo = body.repository?.full_name;
+        const prNumber = body.number;
+
+        const [owner, repoName] = repo.split("/");
+
+        if (
+          action === "opened" ||
+          action === "synchronize" ||
+          action === "reopened"
+        ) {
+          reviewPullRequest(owner, repoName, prNumber)
+            .then(() =>
+              logger.info(
+                { repo, prNumber },
+                "review request sent successfully",
+              ),
+            )
+            .catch((error) =>
+              logger.error(
+                {
+                  repo,
+                  prNumber,
+                  err: error instanceof Error ? error.message : String(error),
+                },
+                "review request failed",
+              ),
+            );
+        } else {
+          logger.info({ action }, "skipping pr action");
+        }
+      }
+
+      return NextResponse.json({ message: "Event processed" }, { status: 200 });
+    } catch (error) {
+      statusCode = 500;
+      logger.error(
+        { err: error instanceof Error ? error.message : String(error) },
+        "webhook error",
+      );
+      return NextResponse.json({ message: "Webhook failed" }, { status: 500 });
+    } finally {
+      stopTimer({ status_code: String(statusCode) });
+    }
+  });
 }

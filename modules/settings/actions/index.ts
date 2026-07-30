@@ -2,9 +2,12 @@
 
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { getOrSet, invalidatePattern } from "@/lib/cache";
 import { deleteWebhook } from "@/modules/github/lib/github";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+
+const DASHBOARD_CACHE_TTL_SECONDS = 30;
 
 // Get user profile
 export async function getUserProfile() {
@@ -23,22 +26,25 @@ export async function getUserProfile() {
       throw new Error("User ID not found in session");
     }
 
-    // Find the user from the database by ID
-    const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return user;
+    return await getOrSet(
+      `dash:${session.user.id}:profile`,
+      DASHBOARD_CACHE_TTL_SECONDS,
+      () =>
+        // Find the user from the database by ID
+        prisma.user.findUnique({
+          where: {
+            id: session.user.id,
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        })
+    );
   } catch (error) {
     console.error("Error fetching user profile:", error);
     throw error;
@@ -84,6 +90,8 @@ export async function updateUserProfile(data: {
       },
     });
 
+    await invalidatePattern(`dash:${session.user.id}:*`);
+
     // Revalidate the settings page to show the updated profile
 
     revalidatePath("/dashboard/settings", "page");
@@ -108,25 +116,28 @@ export async function getConnectedRepositories() {
       throw new Error("User not authenticated");
     }
 
-    // Find all repositories connected by the user
-    const repositories = await prisma.repository.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      select: {
-        id: true,
-        name: true,
-        fullName: true,
-        url: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return repositories;
+    return await getOrSet(
+      `dash:${session.user.id}:connected-repos`,
+      DASHBOARD_CACHE_TTL_SECONDS,
+      () =>
+        // Find all repositories connected by the user
+        prisma.repository.findMany({
+          where: {
+            userId: session.user.id,
+          },
+          select: {
+            id: true,
+            name: true,
+            fullName: true,
+            url: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+    );
   } catch (error) {
     console.error("Error fetching connected repositories:", error);
     return [];
@@ -179,6 +190,8 @@ export async function disconnectRepository(repositoryId: string) {
         },
       }),
     ]);
+
+    await invalidatePattern(`dash:${session.user.id}:*`);
 
     // Revalidate the repository page to show the updated repositories
 
@@ -234,6 +247,8 @@ export async function disconnectAllRepositories() {
         },
       }),
     ]);
+
+    await invalidatePattern(`dash:${session.user.id}:*`);
 
     // Revalidate the repository page to show the updated repositories
 

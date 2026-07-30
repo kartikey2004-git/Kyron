@@ -1,5 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { config } from "dotenv";
+import { getLogger } from "@/lib/logger";
+import { getOrSet, hashKey } from "@/lib/cache";
+import { embeddingGenerationDuration } from "@/lib/metrics";
+import { withSpan } from "@/lib/tracing";
 config();
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -33,7 +37,10 @@ async function delayWithJitter(
 
   const totalDelay = Math.min(exponentialDelay + jitter, MAX_BACKOFF_MS);
 
-  console.log(`[Embedding] Retry ${attempt + 1} in ${totalDelay}ms`);
+  getLogger().warn(
+    { attempt: attempt + 1, delayMs: totalDelay },
+    "embedding call retrying after backoff"
+  );
 
   await sleep(totalDelay);
 }
@@ -76,17 +83,36 @@ export async function generateEmbedding(
     throw new Error("Cannot generate embedding for empty text");
   }
 
+  // Content-addressed: the key IS the hash of the exact chunk text, so a
+  // cache hit is definitionally still correct — no TTL, no invalidation
+  // needed. Reindexing unchanged files across runs becomes free.
+  return getOrSet(`embedding:${hashKey(content)}`, null, () =>
+    generateEmbeddingUncached(content, maxRetries)
+  );
+}
+
+async function generateEmbeddingUncached(
+  content: string,
+  maxRetries: number
+): Promise<number[]> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const stopTimer = embeddingGenerationDuration.startTimer();
+
     try {
-      const response = await ai.models.embedContent({
-        model: EMBEDDING_MODEL,
-        contents: content,
-        config: {
-          outputDimensionality: OUTPUT_DIMENSIONS,
-        },
-      });
+      const response = await withSpan(
+        "gemini.embedContent",
+        () =>
+          ai.models.embedContent({
+            model: EMBEDDING_MODEL,
+            contents: content,
+            config: {
+              outputDimensionality: OUTPUT_DIMENSIONS,
+            },
+          }),
+        { "gemini.model": EMBEDDING_MODEL }
+      );
 
       const embedding = response.embeddings?.[0]?.values;
 
@@ -94,18 +120,21 @@ export async function generateEmbedding(
         throw new Error("Embedding response was empty");
       }
 
+      stopTimer();
       return embedding;
     } catch (error) {
       lastError = error;
 
       const status = getStatusCode(error);
 
-      console.error(
-        `[Embedding] Attempt ${attempt + 1}/${maxRetries + 1} failed`,
+      getLogger().error(
         {
+          attempt: attempt + 1,
+          maxAttempts: maxRetries + 1,
           status,
-          message: error instanceof Error ? error.message : String(error),
-        }
+          err: error instanceof Error ? error.message : String(error),
+        },
+        "embedding generation attempt failed"
       );
 
       if (attempt === maxRetries || !isRetryableError(error)) {

@@ -233,6 +233,35 @@ The project uses:
 - Store utility functions in `lib/`
 - Follow the existing naming conventions and file organization
 
+## Production-readiness stack
+
+Alongside the Vercel deployment above, this repo also has a **self-hosted,
+docker-compose-based production-readiness stack** — a portfolio/SRE-skills
+demonstration covering the practices you'd expect from a real production
+service: structured logging, distributed tracing, metrics + dashboards,
+caching with graceful degradation, load testing, SLOs, chaos testing, and a
+CI/CD pipeline with automated rollback. It's an *additional* way to run the
+app, not a replacement for the existing Vercel deployment (see `plan.md` §0
+for why the two are kept fully separate).
+
+```bash
+cp .env.docker.example .env.docker   # fill in real secrets
+docker compose up -d                  # full stack: app, Postgres, Redis,
+                                       # Inngest, OTel Collector, Prometheus,
+                                       # Tempo, Loki, Promtail, Grafana
+```
+
+Grafana: `localhost:3001` (anonymous admin access — local demo only).
+
+| Doc | Covers |
+|---|---|
+| [`docs/observability-stack.md`](docs/observability-stack.md) | Logging, tracing, metrics, Grafana dashboards, how they correlate |
+| [`docs/caching-strategy.md`](docs/caching-strategy.md) | The Redis cache-aside layer — what's cached, key/TTL/invalidation choices, why |
+| [`docs/slo.md`](docs/slo.md) | SLIs/SLOs, error budget policy, which numbers are measured vs. estimated |
+| [`docs/chaos-findings.md`](docs/chaos-findings.md) | Pumba chaos tests against Postgres/Redis/GitHub API — what broke, what was fixed, before/after evidence |
+| [`docs/deployment.md`](docs/deployment.md) | The GitHub Actions CI/CD pipeline: build → smoke test → promote-or-rollback, plus the manual rollback workflow |
+| [`plan.md`](plan.md) | The full implementation plan this stack was built against, including explicit non-goals |
+
 ## Support & Maintenance
 
 For support:

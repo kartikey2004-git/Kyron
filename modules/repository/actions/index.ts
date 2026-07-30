@@ -3,11 +3,14 @@
 import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { getOrSet, invalidatePattern } from "@/lib/cache";
 import {
   createWebhook,
   getUserRepositories,
 } from "@/modules/github/lib/github";
 import { headers } from "next/headers";
+
+const DASHBOARD_CACHE_TTL_SECONDS = 30;
 
 // Fetch user repositories from GitHub API and check which ones are connected to the user
 export const fetchUserRepositories = async (
@@ -24,27 +27,33 @@ export const fetchUserRepositories = async (
     throw new Error("User not authenticated");
   }
 
-  // Fetch repositories from GitHub API
-  const githubRepos = await getUserRepositories(page, perPage);
+  return getOrSet(
+    `dash:${session.user.id}:repos:${page}:${perPage}`,
+    DASHBOARD_CACHE_TTL_SECONDS,
+    async () => {
+      // Fetch repositories from GitHub API
+      const githubRepos = await getUserRepositories(page, perPage);
 
-  // Fetch connected repositories from database
-  const dbRepos = await prisma.repository.findMany({
-    where: {
-      userId: session.user.id,
-    },
-  });
+      // Fetch connected repositories from database
+      const dbRepos = await prisma.repository.findMany({
+        where: {
+          userId: session.user.id,
+        },
+      });
 
-  // Create a set of connected repository IDs for efficient lookup
+      // Create a set of connected repository IDs for efficient lookup
 
-  const connectedRepoIds = new Set(dbRepos.map((repo) => repo.githubId));
+      const connectedRepoIds = new Set(dbRepos.map((repo) => repo.githubId));
 
-  // Add isConnected flag to each repository
-  const result = githubRepos.map((repo) => ({
-    ...repo,
-    isConnected: connectedRepoIds.has(BigInt(repo.id)),
-  }));
+      // Add isConnected flag to each repository
+      const result = githubRepos.map((repo) => ({
+        ...repo,
+        isConnected: connectedRepoIds.has(BigInt(repo.id)),
+      }));
 
-  return result;
+      return result;
+    }
+  );
 };
 
 export const connectRepository = async (
@@ -104,6 +113,11 @@ export const connectRepository = async (
         },
       }),
     ]);
+
+    // The dashboard's repo count/list just changed under it — TTL alone
+    // would leave the user looking at stale data for up to 30s right after
+    // their own action.
+    await invalidatePattern(`dash:${session.user.id}:*`);
   }
 
   // TRIGGER REPOSITORY INDEXING USING RAG(FIRE AND FORGOT)
