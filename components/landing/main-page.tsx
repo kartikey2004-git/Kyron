@@ -16,7 +16,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import { features, footerLinks, socialLinks, steps } from "./data";
+import { features, steps } from "./data";
 import { useMounted } from "@/hooks/use-mounted";
 
 export function MainPage() {

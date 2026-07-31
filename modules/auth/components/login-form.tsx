@@ -3,18 +3,15 @@
 import { signIn } from "@/lib/auth-client";
 import { Moon, Sun } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTheme } from "next-themes";
+import { useMounted } from "@/hooks/use-mounted";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
