@@ -12,7 +12,7 @@ interface ReviewListProps {
 export const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => {
   if (reviews.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg bg-muted/30">
+      <div className="flex flex-col items-center justify-center py-16 text-center border border-border bg-muted/30">
         <Bot className="h-8 w-8 text-muted-foreground mb-3" />
 
         <h3 className="text-sm font-semibold">No reviews yet</h3>

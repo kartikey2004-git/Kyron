@@ -66,7 +66,7 @@ const RepoList: React.FC<RepoListProps> = ({ className }) => {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="flex items-center justify-between p-3 border rounded-lg"
+                className="flex items-center justify-between p-3 border border-border"
               >
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-48" />

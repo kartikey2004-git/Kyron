@@ -12,39 +12,40 @@ const ReviewsPage: React.FC = () => {
   const { reviews, isLoading, error, refetch } = useReviews();
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b border-border">
-        <div className="max-w-7xl mx-auto -mt-10 py-8">
-          <h1 className="text-3xl font-bold tracking-tight">Code Reviews</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            View and manage all your AI-powered code reviews
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          History
+        </p>
+        <h1 className="mt-1 text-[22px] font-medium tracking-[-0.04em] text-foreground">
+          Code Reviews
+        </h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          All AI-powered reviews Kryon has posted on your pull requests.
+        </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {isLoading ? (
-          <ReviewSkeleton />
-        ) : error ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <div>Failed to load reviews. Please try again later.</div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                className="ml-4"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <ReviewList reviews={reviews} />
-        )}
-      </div>
+      {isLoading ? (
+        <ReviewSkeleton />
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <div>Failed to load reviews. Please try again.</div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <ReviewList reviews={reviews} />
+      )}
     </div>
   );
 };

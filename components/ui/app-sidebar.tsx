@@ -1,13 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useCallback } from "react";
-import { Moon, Sun } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import {
-  useModeAnimation,
-  ThemeAnimationType,
-} from "react-theme-switch-animation";
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +12,6 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -35,23 +28,7 @@ const AppSideBar = () => {
   const mounted = useMounted();
   const { state } = useSidebar();
 
-  // Theme switch animation hook
-  const {
-    ref: themeButtonRef,
-    toggleSwitchTheme,
-    isDarkMode,
-  } = useModeAnimation({
-    animationType: ThemeAnimationType.CIRCLE,
-    duration: 400,
-    easing: "ease-in-out",
-    globalClassName: "dark",
-  });
-
   const { data: user, isLoading: isUserLoading } = useUserProfile();
-
-  const handleThemeToggle = useCallback(() => {
-    toggleSwitchTheme();
-  }, [toggleSwitchTheme]);
 
   if (!mounted || isUserLoading || !user) return null;
 
@@ -180,19 +157,6 @@ const AppSideBar = () => {
                   </div>
                 )}
 
-                <Button
-                  ref={themeButtonRef}
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleThemeToggle}
-                  className="shrink-0 h-8 w-8 p-0 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                >
-                  {isDarkMode ? (
-                    <Sun className="h-4 w-4" />
-                  ) : (
-                    <Moon className="h-4 w-4" />
-                  )}
-                </Button>
               </div>
             </DropdownMenuTrigger>
           </DropdownMenu>

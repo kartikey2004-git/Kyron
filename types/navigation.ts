@@ -1,5 +1,7 @@
 import { LucideIcon } from "lucide-react";
 
+export type IconComponent = React.ElementType;
+
 export interface NavigationItem {
   title: string;
   url: string;

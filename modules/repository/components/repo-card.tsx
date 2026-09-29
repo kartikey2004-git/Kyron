@@ -29,7 +29,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
   connecting,
 }) => {
   return (
-    <article className="group flex flex-col rounded-md border bg-card hover:border-foreground/30 transition-all duration-200 hover:shadow-sm">
+    <article className="group flex flex-col border border-border bg-card hover:border-foreground/40 transition-colors duration-200">
       <div className="flex flex-col gap-3.5 p-5 flex-1">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
@@ -39,7 +39,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
             </h3>
 
             {repo.isConnected && (
-              <span className="flex items-center gap-1 text-xs border text-muted-foreground px-2 py-0.5 rounded-full">
+              <span className="flex items-center gap-1 text-xs border border-border text-muted-foreground px-2 py-0.5">
                 <Check className="h-3 w-3" /> connected
               </span>
             )}
@@ -82,7 +82,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-5 py-3 border-t bg-muted/50 rounded-b-md">
+      <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-muted/30">
         <div className="flex items-center gap-4">
           {repo.language && (
             <span className="text-sm text-muted-foreground">

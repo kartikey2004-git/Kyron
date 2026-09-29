@@ -1,5 +1,6 @@
+"use client";
+
 import Link from "next/link";
-import { GutterRails } from "./gutter-rails";
 import { footerNav, socialLinks } from "./data";
 
 function KryonMark() {
@@ -15,13 +16,20 @@ function KryonMark() {
   );
 }
 
+function scrollToSection(href: string) {
+  const hash = href.startsWith("/#") ? href.slice(2) : null;
+  if (!hash) return false;
+  const el = document.getElementById(hash);
+  if (!el) return false;
+  el.scrollIntoView({ behavior: "smooth" });
+  return true;
+}
+
 export function SiteFooter() {
   return (
-    <footer className="relative bg-footer-surface text-on-footer">
-      <GutterRails />
-
-      <div className="relative mx-auto max-w-4xl border-t border-hairline px-6 py-14 sm:border-x lg:px-8 dark:border-white/10">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr]">
+    <footer className="relative bg-zinc-950 text-zinc-100">
+      <div className="relative mx-auto max-w-7xl px-6 py-14 lg:px-8">
+        <div className="grid gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <Link
               href="/"
@@ -31,7 +39,7 @@ export function SiteFooter() {
               Kryon
             </Link>
 
-            <p className="mt-3 max-w-xs text-[13px] leading-[1.6] text-on-footer/50">
+            <p className="mt-3 max-w-xs text-[13px] leading-[1.6] text-zinc-400">
               AI pull request reviews grounded in your own codebase, not just
               the diff.
             </p>
@@ -39,7 +47,7 @@ export function SiteFooter() {
 
           {footerNav.map((group) => (
             <div key={group.title}>
-              <p className="text-[11px] tracking-[0.2px] uppercase text-on-footer/40">
+              <p className="text-[11px] tracking-[0.2px] uppercase text-zinc-500">
                 {group.title}
               </p>
 
@@ -51,14 +59,24 @@ export function SiteFooter() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[13px] text-on-footer/70 transition-colors hover:text-on-footer"
+                        className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100"
                       >
                         {link.name}
                       </a>
+                    ) : link.href.startsWith("/#") ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(link.href);
+                        }}
+                        className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100"
+                      >
+                        {link.name}
+                      </button>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-[13px] text-on-footer/70 transition-colors hover:text-on-footer"
+                        className="text-[13px] text-zinc-400 transition-colors hover:text-zinc-100"
                       >
                         {link.name}
                       </Link>
@@ -70,8 +88,8 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col-reverse items-center gap-5 border-t border-hairline pt-6 sm:flex-row sm:justify-between dark:border-white/10">
-          <p className="text-[12px] text-on-footer/40">
+        <div className="mt-12 flex flex-col-reverse items-center gap-5 border-t border-zinc-800 pt-6 sm:flex-row sm:justify-between">
+          <p className="text-[12px] text-zinc-600">
             © 2026 Kryon · Built by Kartikey
           </p>
 
@@ -86,7 +104,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={link.name}
-                  className="text-on-footer/50 transition-colors hover:text-on-footer"
+                  className="text-zinc-500 transition-colors hover:text-zinc-100"
                 >
                   <Icon className="size-4" />
                 </a>

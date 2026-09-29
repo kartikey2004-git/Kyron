@@ -21,44 +21,44 @@ import { FaLinkedinIn } from "react-icons/fa";
 export const features = [
   {
     icon: Bot,
-    title: "AI PR Summaries",
+    title: "Instant PR Summaries",
     description:
-      "Get instant, intelligent summaries of pull requests to understand changes at a glance.",
+      "Kryon reads every diff and generates a summary in seconds: what changed, why it matters, and what to watch out for.",
     badge: "Popular",
   },
   {
     icon: MessageSquare,
-    title: "Inline Suggestions",
+    title: "Line-by-Line Suggestions",
     description:
-      "Receive contextual code suggestions directly in your pull requests for better implementations.",
+      "Get targeted, actionable suggestions pinned to the exact lines that need attention. Not generic advice, but fixes you can apply immediately.",
     badge: null,
   },
   {
     icon: Shield,
-    title: "Security Detection",
+    title: "Security Vulnerability Scan",
     description:
-      "Automatically identify security vulnerabilities and potential issues before they reach production.",
-    badge: "Enterprise",
+      "Catches common security pitfalls (exposed secrets, injection risks, unsafe dependencies) before your PR ever merges to main.",
+    badge: "Critical",
   },
   {
     icon: Zap,
-    title: "Auto Comments",
+    title: "Auto-Generated Comments",
     description:
-      "AI automatically adds meaningful comments explaining complex code changes and improvements.",
+      "Kryon posts review comments directly on your PR with context, rationale, and a suggested fix, so reviewers start informed, not from scratch.",
     badge: null,
   },
   {
     icon: GitBranch,
-    title: "Faster Reviews",
+    title: "Multi-Language Support",
     description:
-      "Reduce review time by 80% with AI-powered analysis that catches issues humans might miss.",
+      "Works across TypeScript, JavaScript, Python, Go, and more. Kryon adapts its analysis to the idioms and best practices of each language.",
     badge: "Popular",
   },
   {
     icon: Code2,
-    title: "Code Quality",
+    title: "Code Quality Scoring",
     description:
-      "Ensure consistent code quality with automated checks for best practices and standards.",
+      "Each PR gets a quality score with a breakdown of readability, complexity, test coverage hints, and adherence to project conventions.",
     badge: null,
   },
 ];
@@ -66,50 +66,51 @@ export const features = [
 export const steps = [
   {
     icon: FiGithub as any,
-    title: "Connect GitHub",
+    title: "Connect your GitHub repo",
     description:
-      "Install our GitHub app in seconds. No complex setup required.",
+      "Sign in with GitHub, select the repositories you want reviewed, and grant Kryon read access. Done in under 60 seconds.",
   },
   {
     icon: Code,
-    title: "Open a Pull Request",
+    title: "Open any pull request",
     description:
-      "Create a PR as usual. Our AI automatically analyzes every change.",
+      "Push a branch and open a PR as you normally would. Kryon picks it up automatically, no extra commands or webhooks to configure.",
   },
   {
     icon: CheckCircle,
-    title: "Get AI Reviews",
+    title: "Review in seconds, not hours",
     description:
-      "Receive instant feedback, suggestions, and automated comments.",
+      "Kryon posts a full AI review on your PR: a summary, inline suggestions, a security scan, and a quality score. All before your first human reviewer arrives.",
   },
 ];
 
 export const plans = [
   {
     name: "Free",
-    description: "Perfect for individual developers",
+    description: "Everything you need to get started",
     price: "$0",
     period: "/month",
     features: [
-      "5 PR reviews per month",
-      "Basic AI suggestions",
-      "Public repositories only",
+      "10 PR reviews per month",
+      "AI summaries & inline suggestions",
+      "Security vulnerability scan",
+      "Public repositories",
       "Community support",
     ],
     highlighted: false,
   },
   {
     name: "Pro",
-    description: "For professional developers",
+    description: "For developers who ship every day",
     price: "$29",
     period: "/month",
     features: [
       "Unlimited PR reviews",
-      "Advanced AI analysis",
       "Private repositories",
+      "Code quality scoring",
+      "Multi-language deep analysis",
       "Priority support",
-      "Custom rules",
-      "Team collaboration",
+      "Custom review rules",
     ],
     highlighted: true,
   },
@@ -136,7 +137,7 @@ export const footerLinks = {
 export const socialLinks = [
   {
     name: "GitHub",
-    href: "https://github.com/kartikey2004-git/AI-Code-Review",
+    href: "https://github.com/kartikey2004-git/Kyron",
     icon: FiGithub as any,
   },
   { name: "Twitter", href: "https://x.com/kartikeybuilds", icon: X },

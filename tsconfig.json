@@ -30,5 +30,13 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "features/ai",
+    "features/auth",
+    "features/dashboard",
+    "features/repository",
+    "features/review",
+    "features/settings"
+  ]
 }

@@ -1,24 +1,19 @@
 "use client";
 
 import { signIn } from "@/lib/auth-client";
-import { Moon, Sun } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useTheme } from "next-themes";
-import { useMounted } from "@/hooks/use-mounted";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { theme, setTheme } = useTheme();
-  const mounted = useMounted();
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
-      await signIn.social({ provider: "github" });
+      await signIn.social({ provider: "github", callbackURL: "/dashboard" });
     } catch (err) {
       console.error(err);
       setError("Authentication failed. Please try again.");
@@ -26,74 +21,82 @@ export default function LoginForm() {
     }
   };
 
-  const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  if (!mounted) return null;
-
   return (
-    <div className="min-h-screen bg-background grid grid-cols-1 md:grid-cols-2 relative">
-      {/* Theme Toggle Button */}
-      <button
-        onClick={handleThemeToggle}
-        className="absolute top-6 right-6 p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors"
-        aria-label="Toggle theme"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-5 w-5 text-foreground" />
-        ) : (
-          <Moon className="h-5 w-5 text-foreground" />
-        )}
-      </button>
+    <div className="relative min-h-screen grid grid-cols-1 md:grid-cols-2 bg-[#fafafa] dark:bg-zinc-950">
+      {/* Dot grid background */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50"
+        style={{
+          backgroundImage: "radial-gradient(circle, #d4d4d4 1px, transparent 1px)",
+          backgroundSize: "16px 16px",
+        }}
+      />
 
-      <div className="hidden md:flex flex-col justify-between p-12 border-r border-border">
-        <div className="space-y-2">
-          <h1 className="text-xl font-semibold tracking-tight">
-            Kryon | AI Code Review
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Review pull requests in seconds with AI
+      {/* Left panel */}
+      <div className="relative hidden md:flex flex-col justify-between border-r border-zinc-200 bg-white p-12 dark:border-zinc-800 dark:bg-zinc-950">
+        <div>
+          <span className="inline-flex items-center bg-[#dcfce7] px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-[#047857]">
+            AI-POWERED CODE REVIEW
+          </span>
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">
+            Kryon
           </p>
         </div>
 
-        <div className="max-w-md space-y-6">
-          <h2 className="text-4xl font-semibold leading-tight tracking-tight">
-            Cut code review time and bugs in half
+        <div className="max-w-md space-y-5">
+          <h2 className="text-[38px] font-medium leading-[0.96] tracking-[-0.05em] text-black dark:text-white">
+            Cut review time.<br />Ship better code.
           </h2>
-
-          <p className="text-base text-muted-foreground leading-relaxed">
-            Supercharge your team to ship faster with AI-powered code reviews,
-            automated insights, and smarter debugging workflows.
+          <p className="text-[15px] leading-[1.5] text-zinc-500">
+            Kryon posts a full AI review on every PR before your first human
+            reviewer arrives. Summaries, inline suggestions, security scans,
+            quality scores.
           </p>
+
+          <div className="border-l-2 border-emerald-600 pl-4">
+            <p className="text-[13px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+              &ldquo;Kryon catches the issues that slip through rushed reviews.
+              It has become part of every PR we merge.&rdquo;
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+              Kartikey, Builder of Kryon
+            </p>
+          </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
           Built for developers who care about quality.
         </p>
       </div>
 
-      <div className="flex items-center justify-center px-8">
+      {/* Right panel */}
+      <div className="relative flex items-center justify-center px-8">
         <div className="w-full max-w-sm">
-          <div className="mb-8 md:hidden text-center space-y-2">
-            <h1 className="text-xl font-semibold tracking-tight">
-              CodeSense AI
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Review pull requests in seconds with AI
+
+          {/* Mobile brand */}
+          <div className="mb-8 text-center md:hidden">
+            <span className="inline-flex items-center bg-[#dcfce7] px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-[#047857]">
+              AI-POWERED CODE REVIEW
+            </span>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">
+              Kryon
             </p>
           </div>
 
-          <div className="border border-border bg-card rounded-md p-8 space-y-8 shadow-lg">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Sign in</h2>
-              <p className="text-sm text-muted-foreground">
-                Continue with your GitHub account
-              </p>
-            </div>
+          {/* Card */}
+          <div className="border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+              Sign in
+            </p>
+            <h2 className="mt-3 text-[22px] font-medium tracking-[-0.04em] text-black dark:text-white">
+              Continue with GitHub
+            </h2>
+            <p className="mt-1 text-[13px] text-zinc-500">
+              Your GitHub account is all you need.
+            </p>
 
             {error && (
-              <div className="text-sm text-red-600 border border-red-600/20 bg-red-600/10 px-4 py-3 rounded-lg">
+              <div className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400">
                 {error}
               </div>
             )}
@@ -102,41 +105,29 @@ export default function LoginForm() {
               onClick={handleGithubLogin}
               disabled={isLoading}
               aria-busy={isLoading}
-              className="w-full flex items-center justify-center gap-3 text-base font-medium rounded-lg 
-              bg-foreground text-background 
-              hover:bg-muted-foreground 
-              active:scale-[0.98] 
-              transition-all duration-200 
-              disabled:opacity-50 
-              h-12 px-6"
+              className="mt-7 flex h-11 w-full items-center justify-center gap-3 bg-black text-[14px] font-medium text-white transition-colors hover:bg-zinc-800 active:scale-[0.99] disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               {isLoading ? (
-                <span className="flex items-center gap-3">
-                  <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Signing in...</span>
-                </span>
+                </>
               ) : (
                 <>
-                  <FaGithub size={18} />
+                  <FaGithub size={16} />
                   <span>Continue with GitHub</span>
                 </>
               )}
             </button>
           </div>
 
-          <p className="text-sm text-muted-foreground text-center mt-8">
+          <p className="mt-6 text-center text-[12px] text-zinc-400">
             By continuing, you agree to our{" "}
-            <a
-              href="#"
-              className="text-foreground hover:underline underline-offset-4"
-            >
+            <a href="/terms" className="text-zinc-700 underline underline-offset-4 hover:text-black dark:text-zinc-300 dark:hover:text-white">
               Terms
             </a>{" "}
             and{" "}
-            <a
-              href="#"
-              className="text-foreground hover:underline underline-offset-4"
-            >
+            <a href="/privacy" className="text-zinc-700 underline underline-offset-4 hover:text-black dark:text-zinc-300 dark:hover:text-white">
               Privacy Policy
             </a>
           </p>

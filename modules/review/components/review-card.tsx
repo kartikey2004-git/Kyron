@@ -47,7 +47,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
 
   return (
     <>
-      <Card className="flex flex-col h-full hover:shadow-md transition-shadow">
+      <Card className="flex flex-col h-full border-border transition-colors hover:bg-muted/30">
         <CardHeader className="px-4 py-3 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -50,16 +50,10 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
         <SidebarRail />
 
         <SidebarInset>
-          <header
-            className={cn(
-              "flex h-16 shrink-0 items-center gap-2 px-6 py-6 mt-3",
-            )}
-          >
+          <header className={cn("flex h-14 shrink-0 items-center gap-3 border-b border-border px-6")}>
             <SidebarTrigger className="-ml-1" />
-
-            <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
           </header>
-          <main className="flex-1 overflow-auto p-6">{children}</main>
+          <main className="flex-1 overflow-auto px-4 py-6 sm:px-6 sm:py-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

@@ -14,13 +14,15 @@ export const RepositoryHeader: React.FC<RepositoryHeaderProps> = ({
   connectedCount,
 }) => {
   return (
-    <div className="space-y-1">
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">
+    <div>
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
         Repositories
+      </p>
+      <h1 className="mt-1 text-[22px] font-medium tracking-[-0.04em] text-foreground">
+        Connect a repository
       </h1>
-
       {!isLoading && (
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-[13px] text-muted-foreground">
           {totalRepositories} repos · {connectedCount} connected
         </p>
       )}

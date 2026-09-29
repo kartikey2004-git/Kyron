@@ -12,10 +12,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
-import { GitPullRequest, KeyRound, Unplug } from "lucide-react";
-import { signIn } from "@/server/auth/auth-client";
+import { GitPullRequest, KeyRound, Loader2, Unplug } from "lucide-react";
+import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { steps } from "@/features/marketing";
 import type { IconComponent } from "@/types/navigation";
 
@@ -71,7 +70,7 @@ export default function LoginForm() {
     // On success, signIn.social redirects the whole page to GitHub's OAuth screen, so this component unmounts when isLoading only needs resetting on the failure path.
 
     try {
-      await signIn.social({ provider: "github" });
+      await signIn.social({ provider: "github", callbackURL: "/dashboard" });
     } catch (err) {
       console.error(err);
       setError("Authentication failed. Please try again.");
@@ -91,16 +90,12 @@ export default function LoginForm() {
             Kryon
           </Link>
 
-          <div className="flex items-center gap-5">
-            <Link
-              href="/"
-              className="text-link-sm font-normal text-ink-soft transition-colors hover:text-foreground dark:text-ash"
-            >
-              Back to Home
-            </Link>
-
-            <ThemeToggle variant="ghost" />
-          </div>
+          <Link
+            href="/"
+            className="text-link-sm font-normal text-ink-soft transition-colors hover:text-foreground dark:text-ash"
+          >
+            Back to Home
+          </Link>
         </div>
       </header>
 
@@ -190,7 +185,7 @@ export default function LoginForm() {
               >
                 {isLoading ? (
                   <span className="flex items-center gap-3">
-                    <div className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    <Loader2 className="size-4 animate-spin" />
                     <span>Signing in...</span>
                   </span>
                 ) : (
@@ -254,19 +249,19 @@ export default function LoginForm() {
 
             <p className="mt-3 text-center text-meta text-muted-foreground">
               By continuing, you agree to our{" "}
-              <a
-                href="#"
+              <Link
+                href="/terms"
                 className="text-foreground underline-offset-4 hover:underline"
               >
                 Terms
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a
-                href="#"
+              <Link
+                href="/privacy"
                 className="text-foreground underline-offset-4 hover:underline"
               >
                 Privacy Policy
-              </a>
+              </Link>
               .
             </p>
           </div>

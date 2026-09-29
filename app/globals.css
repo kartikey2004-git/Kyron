@@ -3,9 +3,14 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 
+html[data-scroll-behavior="smooth"] {
+  scroll-behavior: smooth;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* shadcn base tokens */
   --background: oklch(0.99 0 0);
   --foreground: oklch(0 0 0);
   --card: oklch(1 0 0);
@@ -38,11 +43,28 @@
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.94 0 0);
   --sidebar-ring: oklch(0 0 0);
+
+  /* Typography */
   --font-sans: var(--font-inter), Geist, sans-serif;
   --font-serif: var(--font-playfair), Georgia, serif;
   --font-mono: var(--font-jetbrains), Geist Mono, monospace;
   --font-display: var(--font-space-grotesk), sans-serif;
-  --radius: 0.5rem;
+
+  /* Radius — sharp corners everywhere, matching landing design */
+  --radius: 0rem;
+
+  /* Design language tokens */
+  --hairline: oklch(0.91 0 0);
+  --stone: oklch(0.52 0 0);
+  --ash: oklch(0.62 0 0);
+  --slate-muted: oklch(0.43 0 0);
+  --ink-soft: oklch(0.48 0 0);
+  --footer-surface: oklch(0.09 0 0);
+  --on-footer: oklch(0.97 0 0);
+  --brand-accent: oklch(0.45 0.14 162);
+  --brand-accent-bg: oklch(0.96 0.05 162);
+
+  /* Shadows */
   --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 2px;
@@ -67,43 +89,55 @@
 }
 
 .dark {
-  --background: oklch(0 0 0);
+  --background: oklch(0.06 0 0);
   --foreground: oklch(1 0 0);
-  --card: oklch(0.14 0 0);
+  --card: oklch(0.11 0 0);
   --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.18 0 0);
+  --popover: oklch(0.14 0 0);
   --popover-foreground: oklch(1 0 0);
   --primary: oklch(1 0 0);
   --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.25 0 0);
+  --secondary: oklch(0.20 0 0);
   --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.23 0 0);
-  --muted-foreground: oklch(0.72 0 0);
-  --accent: oklch(0.32 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.22 0 0);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.69 0.2 23.91);
   --destructive-foreground: oklch(0 0 0);
-  --border: oklch(0.26 0 0);
-  --input: oklch(0.32 0 0);
-  --ring: oklch(0.72 0 0);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.65 0 0);
   --chart-1: oklch(0.81 0.17 75.35);
   --chart-2: oklch(0.58 0.21 260.84);
   --chart-3: oklch(0.56 0 0);
   --chart-4: oklch(0.44 0 0);
   --chart-5: oklch(0.92 0 0);
-  --sidebar: oklch(0.18 0 0);
+  --sidebar: oklch(0.09 0 0);
   --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: oklch(1 0 0);
   --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.32 0 0);
+  --sidebar-accent: oklch(0.22 0 0);
   --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.32 0 0);
-  --sidebar-ring: oklch(0.72 0 0);
+  --sidebar-border: oklch(0.22 0 0);
+  --sidebar-ring: oklch(0.65 0 0);
   --font-sans: var(--font-inter), Geist, sans-serif;
   --font-serif: var(--font-playfair), Georgia, serif;
   --font-mono: var(--font-jetbrains), Geist Mono, monospace;
   --font-display: var(--font-space-grotesk), sans-serif;
-  --radius: 0.5rem;
+  --radius: 0rem;
+
+  /* Design language tokens — dark overrides */
+  --hairline: oklch(0.22 0 0);
+  --stone: oklch(0.58 0 0);
+  --ash: oklch(0.52 0 0);
+  --slate-muted: oklch(0.62 0 0);
+  --ink-soft: oklch(0.60 0 0);
+  --footer-surface: oklch(0.06 0 0);
+  --on-footer: oklch(0.95 0 0);
+  --brand-accent: oklch(0.55 0.14 162);
+  --brand-accent-bg: oklch(0.18 0.04 162);
+
   --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 2px;
@@ -159,6 +193,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  /* Design language — exposed as Tailwind color utilities */
+  --color-hairline: var(--hairline);
+  --color-stone: var(--stone);
+  --color-ash: var(--ash);
+  --color-slate-muted: var(--slate-muted);
+  --color-ink-soft: var(--ink-soft);
+  --color-footer-surface: var(--footer-surface);
+  --color-on-footer: var(--on-footer);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-bg: var(--brand-accent-bg);
+
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
@@ -188,33 +233,83 @@
   }
 }
 
+/* Typography scale — matches landing design language */
+@layer utilities {
+  .text-meta {
+    font-size: 0.6875rem;
+    line-height: 1.45;
+  }
+  .text-body {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .text-body-strong {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .text-heading-sm {
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+  }
+  .text-heading-md {
+    font-size: 1.375rem;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+  }
+  .text-display-sm {
+    font-size: 1.875rem;
+    font-weight: 500;
+    letter-spacing: -0.05em;
+    line-height: 1.0;
+  }
+  .text-link-sm {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  /* Semantic color aliases for features/ components */
+  .text-slate {
+    color: var(--slate-muted);
+  }
+
+  /* Dot-grid pattern utility */
+  .gutter-rail {
+    background-image: radial-gradient(circle, var(--hairline) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+}
+
 /* Highlight.js styles for code blocks */
 @import "highlight.js/styles/github-dark.css" layer(base);
 .dark {
   @import "highlight.js/styles/github.css";
 }
 
-/* Custom scrollbar styles */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted-foreground));
-  border-radius: 10px;
-  border: 2px solid hsl(var(--background));
+  background-color: var(--hairline);
+  border-radius: 0;
+  border: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--foreground));
+  background-color: var(--stone);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: hsl(var(--background));
+  background-color: var(--background);
 }
 
-/* Theme switch animation styles */
+/* View transition */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -230,7 +325,6 @@
   z-index: 9999;
 }
 
-/* Only apply transitions to specific elements, not globally */
 body,
 .card,
 .button,
@@ -245,7 +339,6 @@ body,
     color 0.3s ease-in-out;
 }
 
-/* Disable transitions during theme switch animation */
 .theme-switching * {
   transition: none !important;
 }

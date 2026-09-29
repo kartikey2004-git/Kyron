@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { navigationConfig } from "../config/navigation";
 import type { NavigationItem, NavigationSection } from "@/types/navigation";
 import { UserButton } from "@/features/auth";
@@ -183,7 +182,6 @@ const AppSideBar = () => {
                   </div>
                 )}
 
-                <ThemeToggle className="shrink-0 border-none" />
               </div>
             </DropdownMenuTrigger>
           </DropdownMenu>

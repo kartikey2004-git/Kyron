@@ -30,7 +30,7 @@ import { FaXTwitter } from "react-icons/fa6";
 
 export const siteLinks = {
   docs: "https://kyrondevdocs.vercel.app",
-  github: "https://github.com/kartikey2004-git/AI-Code-Review",
+  github: "https://github.com/kartikey2004-git/Kyron",
   twitter: "https://x.com/kartikeybuilds",
   linkedin: "https://linkedin.com/in/kartikey-bhatnagar-2702a4337",
 } as const;
@@ -483,8 +483,9 @@ export const footerNav: {
     links: [
       { name: "Features", href: "/#features" },
       { name: "How it works", href: "/#how-it-works" },
-      { name: "Pricing", href: "/pricing" },
-      { name: "About", href: "/about" },
+      { name: "Pricing", href: "/#pricing" },
+      { name: "FAQ", href: "/#faq" },
+      { name: "Sign in", href: "/login" },
     ],
   },
   {
@@ -497,7 +498,13 @@ export const footerNav: {
         href: `${siteLinks.github}/issues`,
         external: true,
       },
-      { name: "Sign in", href: "/login" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { name: "Terms of Service", href: "/terms" },
+      { name: "Privacy Policy", href: "/privacy" },
     ],
   },
 ];

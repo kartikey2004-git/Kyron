@@ -78,8 +78,8 @@ const RepositoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground px-6 py-10 -mt-10">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8">
+      <div className="max-w-7xl space-y-8">
         <RepositoryHeader
           isLoading={isLoading}
           totalRepositories={allRepositories.length}
@@ -94,7 +94,7 @@ const RepositoryPage = () => {
         />
 
         {isError && (
-          <div className="rounded-md border bg-muted px-5 py-4 text-sm text-muted-foreground">
+          <div className="border border-border bg-muted px-5 py-4 text-[13px] text-muted-foreground">
             Failed to load repositories. Please try again.
           </div>
         )}

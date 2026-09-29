@@ -28,29 +28,32 @@ const DashboardPage: React.FC = () => {
   const isLoading = statsLoading || activityLoading;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b border-border">
-        <div className="max-w-7xl mx-auto -mt-10 py-8">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track your coding activity and contributions
-          </p>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          Overview
+        </p>
+        <h1 className="mt-1 text-[22px] font-medium tracking-[-0.04em] text-foreground">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">
+          Track your coding activity and contributions.
+        </p>
       </div>
 
       {isLoading ? (
         <DashboardSkeleton />
       ) : (
-        <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <div className="space-y-6">
           <StatsGrid stats={stats} />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-card border border-border rounded-lg p-5 flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="border border-border bg-card p-5 flex flex-col gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  Contribution Graph
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Contribution graph
+                </p>
+                <p className="mt-0.5 text-[13px] text-muted-foreground">
                   Daily activity across the last 6 months
                 </p>
               </div>
@@ -59,7 +62,7 @@ const DashboardPage: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col">
+            <div className="border border-border bg-card overflow-hidden flex flex-col">
               {monthlyActivity && <ActivityTabs data={monthlyActivity} />}
             </div>
           </div>
