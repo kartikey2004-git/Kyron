@@ -59,7 +59,7 @@ Target audience: Individual developers and development teams looking to accelera
 ## Project Structure
 
 ```
-ai-code-review/
+kyron/
 ├── app/                          # Next.js App Router pages
 │   ├── (auth)/                   # Authentication pages
 │   ├── api/                      # API routes
@@ -117,7 +117,7 @@ ai-code-review/
 
 ```bash
 git clone https://github.com/kartikey2004-git/AI-Code-Review.git
-cd ai-code-review
+cd kyron
 ```
 
 2. Install dependencies:

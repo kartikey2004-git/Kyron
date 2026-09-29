@@ -1,6 +1,6 @@
 import { trace, SpanStatusCode, type Attributes } from "@opentelemetry/api";
 
-const tracer = trace.getTracer("ai-code-review");
+const tracer = trace.getTracer("kyron");
 
 // Runs fn() inside a new active span named `name`, recording exceptions and
 // setting an OK/ERROR status so failed spans are filterable in Tempo/Grafana

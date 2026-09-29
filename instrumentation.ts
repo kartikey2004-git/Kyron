@@ -22,7 +22,7 @@ export async function register() {
 
   const sdk = new NodeSDK({
     resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: "ai-code-review",
+      [ATTR_SERVICE_NAME]: "kyron",
     }),
     traceExporter: new OTLPTraceExporter({
       url: `${otlpBase}/v1/traces`,

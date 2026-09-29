@@ -26,7 +26,7 @@ set -euo pipefail
 # See chaos/kill-postgres.sh for why this is needed on Windows/Git Bash.
 export MSYS_NO_PATHCONV=1
 
-CONTAINER="ai-code-review-app"
+CONTAINER="kyron-app"
 DELAY_MS="${DELAY_MS:-20000}"    # bigger than our 15s timeout, on purpose
 NETEM_DURATION="30s"
 TIMEOUT_MS=15000

@@ -9,7 +9,7 @@ import { getRequestContext } from "./request-context";
 const baseLogger = pino({
   level: process.env.LOG_LEVEL ?? "info",
   base: {
-    service: "ai-code-review",
+    service: "kyron",
     env: process.env.NODE_ENV ?? "development",
   },
   redact: {

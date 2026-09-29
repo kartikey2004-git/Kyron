@@ -19,7 +19,7 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 
 BASE_URL="${BASE_URL:-http://localhost:3000}"
-CONTAINER="ai-code-review-db"
+CONTAINER="kyron-db"
 DURATION_S=45
 KILL_AT_S=10
 

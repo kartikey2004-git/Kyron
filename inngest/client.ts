@@ -1,4 +1,4 @@
 import { Inngest } from "inngest";
 
-export const inngest = new Inngest({ id: "ai-code-review" });
+export const inngest = new Inngest({ id: "kyron" });
 

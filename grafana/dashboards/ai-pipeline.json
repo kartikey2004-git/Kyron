@@ -7,7 +7,7 @@
   "timezone": "browser",
   "time": { "from": "now-6h", "to": "now" },
   "refresh": "30s",
-  "tags": ["ai-code-review"],
+  "tags": ["kyron"],
   "panels": [
     {
       "id": 1,
@@ -118,7 +118,7 @@
       "gridPos": { "x": 0, "y": 24, "w": 24, "h": 4 },
       "options": {
         "mode": "markdown",
-        "content": "Individual Inngest **step** durations (e.g. `fetch-and-diff-files`, `retrieve-context`, `generate-ai-review`) aren't Prometheus metrics — they only exist as spans in **Tempo**. Search the Tempo datasource for `service.name=\"ai-code-review\"` and look at spans named after the step id, or open a trace from a slow request via Loki's traceId."
+        "content": "Individual Inngest **step** durations (e.g. `fetch-and-diff-files`, `retrieve-context`, `generate-ai-review`) aren't Prometheus metrics — they only exist as spans in **Tempo**. Search the Tempo datasource for `service.name=\"kyron\"` and look at spans named after the step id, or open a trace from a slow request via Loki's traceId."
       }
     }
   ]

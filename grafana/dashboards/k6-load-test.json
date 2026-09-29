@@ -7,7 +7,7 @@
   "timezone": "browser",
   "time": { "from": "now-15m", "to": "now" },
   "refresh": "5s",
-  "tags": ["ai-code-review", "k6"],
+  "tags": ["kyron", "k6"],
   "panels": [
     {
       "id": 1,

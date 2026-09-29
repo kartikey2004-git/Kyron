@@ -1,18 +1,18 @@
 services:
   postgres:
     image: pgvector/pgvector:pg17
-    container_name: ai-code-review-db
+    container_name: kyron-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: secret123
-      POSTGRES_DB: ai-code-review
+      POSTGRES_DB: kyron
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d ai-code-review"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d kyron"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -21,7 +21,7 @@ services:
   # dashboard reads (see lib/cache.ts, docs/caching-strategy.md).
   redis:
     image: redis:7-alpine
-    container_name: ai-code-review-redis
+    container_name: kyron-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -45,8 +45,8 @@ services:
     # it just pushed, `docker pull` it, then `docker compose up -d` (no
     # --build) reuses that exact image instead of rebuilding from source —
     # the smoke test then verifies the actual image that would be promoted.
-    image: ${APP_IMAGE:-ai-code-review-app:local}
-    container_name: ai-code-review-app
+    image: ${APP_IMAGE:-kyron-app:local}
+    container_name: kyron-app
     restart: unless-stopped
     env_file:
       - .env.docker
@@ -55,7 +55,7 @@ services:
       # .env.docker. sslmode=disable because the local postgres container
       # doesn't have SSL configured (see lib/db.ts, which only forces
       # sslmode=require when the URL doesn't already specify one).
-      DATABASE_URL: postgresql://admin:secret123@postgres:5432/ai-code-review?sslmode=disable
+      DATABASE_URL: postgresql://admin:secret123@postgres:5432/kyron?sslmode=disable
       REDIS_URL: redis://redis:6379
       INNGEST_DEV: "1"
       INNGEST_BASE_URL: http://inngest:8288
@@ -85,7 +85,7 @@ services:
 
   inngest:
     image: inngest/inngest:latest
-    container_name: ai-code-review-inngest
+    container_name: kyron-inngest
     restart: unless-stopped
     command: ["inngest", "dev", "-u", "http://app:3000/api/inngest"]
     ports:
@@ -98,7 +98,7 @@ services:
   # separate "k6 scrape job" anywhere in prometheus.yml.
   prometheus:
     image: prom/prometheus:latest
-    container_name: ai-code-review-prometheus
+    container_name: kyron-prometheus
     restart: unless-stopped
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -118,7 +118,7 @@ services:
   # forwards them to Tempo.
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
-    container_name: ai-code-review-otel-collector
+    container_name: kyron-otel-collector
     restart: unless-stopped
     command: ["--config=/etc/otel-collector-config.yml"]
     volumes:
@@ -136,7 +136,7 @@ services:
     # containers. 2.6.1 is the last monolithic-mode release matching the
     # config below.
     image: grafana/tempo:2.6.1
-    container_name: ai-code-review-tempo
+    container_name: kyron-tempo
     restart: unless-stopped
     # The tempo image's default user can't write to a freshly-created named
     # volume (root-owned by default) — root avoids that for this local-only
@@ -156,7 +156,7 @@ services:
     # Pinned for the same reason as tempo below — a stable, well-documented
     # single-binary config, not whatever :latest currently resolves to.
     image: grafana/loki:2.9.6
-    container_name: ai-code-review-loki
+    container_name: kyron-loki
     restart: unless-stopped
     command: ["-config.file=/etc/loki/loki-config.yml"]
     volumes:
@@ -169,7 +169,7 @@ services:
   # JSON lines, and ships them to Loki (see promtail-config.yml).
   promtail:
     image: grafana/promtail:2.9.6
-    container_name: ai-code-review-promtail
+    container_name: kyron-promtail
     restart: unless-stopped
     command: ["-config.file=/etc/promtail/promtail-config.yml"]
     volumes:
@@ -186,7 +186,7 @@ services:
   # something to carry into a real deployment.
   grafana:
     image: grafana/grafana:11.3.0
-    container_name: ai-code-review-grafana
+    container_name: kyron-grafana
     restart: unless-stopped
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
@@ -211,7 +211,7 @@ services:
   # --rm k6 run /scripts/<name>.js` (see load-tests/README.md).
   k6:
     image: grafana/k6:latest
-    container_name: ai-code-review-k6
+    container_name: kyron-k6
     profiles: ["load-test"]
     environment:
       BASE_URL: http://app:3000
