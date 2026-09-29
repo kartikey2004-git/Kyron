@@ -35,9 +35,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "AI Code Review - Review Pull Requests in Seconds",
+  title: "Kyron - Review Pull Requests in Seconds",
   description:
-    "Review pull requests in seconds with AI. Catch bugs, get intelligent suggestions, and ship better code faster.",
+    "Kyron reviews every pull request in seconds: summaries, inline suggestions, security scans, and quality scores posted directly on your PR.",
 };
 
 export default function RootLayout({
@@ -57,8 +57,8 @@ export default function RootLayout({
         <QueryProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            enableSystem={false}
             disableTransitionOnChange
           >
             {children}
