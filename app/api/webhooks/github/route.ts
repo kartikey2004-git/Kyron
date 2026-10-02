@@ -43,23 +43,19 @@ export async function POST(request: NextRequest) {
           action === "synchronize" ||
           action === "reopened"
         ) {
-          reviewPullRequest(owner, repoName, prNumber)
-            .then(() =>
-              logger.info(
-                { repo, prNumber },
-                "review request sent successfully",
-              ),
-            )
-            .catch((error) =>
-              logger.error(
-                {
-                  repo,
-                  prNumber,
-                  err: error instanceof Error ? error.message : String(error),
-                },
-                "review request failed",
-              ),
+          try {
+            await reviewPullRequest(owner, repoName, prNumber);
+            logger.info({ repo, prNumber }, "review request sent successfully");
+          } catch (error) {
+            logger.error(
+              {
+                repo,
+                prNumber,
+                err: error instanceof Error ? error.message : String(error),
+              },
+              "review request failed",
             );
+          }
         } else {
           logger.info({ action }, "skipping pr action");
         }
